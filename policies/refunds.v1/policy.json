@@ -1,0 +1,25 @@
+{
+  "id": "refunds.v1",
+  "name": "Refunds Protection",
+  "description": "Protects refund endpoints with payment capabilities, assurance levels, and transaction limits",
+  "version": "1.0.0",
+  "requires_capabilities": ["payments.refund"],
+  "min_assurance": "L2",
+  "limits_required": ["refund_usd_max_per_tx", "refund_usd_daily_cap"],
+  "enforcement": {
+    "amount_lte": "limits.refund_usd_max_per_tx",
+    "region_in": "regions"
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Log all refund attempts for audit trails",
+    "Consider implementing daily spend tracking"
+  ],
+  "deprecation": null,
+  "created_at": "2025-01-16T00:00:00Z",
+  "updated_at": "2025-01-16T00:00:00Z"
+}
