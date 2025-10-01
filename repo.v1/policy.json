@@ -1,8 +1,9 @@
 {
   "id": "repo.v1",
-  "name": "Repository Safety",
-  "description": "Protects repository operations with PR limits, merge controls, and path restrictions for dev-first safety",
+  "name": "Repository Safety Policy",
+  "description": "Pre-act governance for repository operations. Enforces PR limits, merge controls, path restrictions, and review requirements for dev-first safety.",
   "version": "1.0.0",
+  "status": "active",
   "requires_capabilities": ["repo.pr.create", "repo.merge"],
   "min_assurance": "L2",
   "limits_required": [
@@ -10,14 +11,21 @@
     "max_merges_per_day",
     "max_pr_size_kb"
   ],
+  "required_fields": ["repository", "action", "branch"],
+  "optional_fields": [
+    "base_branch",
+    "title",
+    "description",
+    "files_changed",
+    "lines_added",
+    "lines_removed"
+  ],
   "enforcement": {
     "allowed_repos_enforced": true,
     "allowed_base_branches_enforced": true,
     "path_allowlist_enforced": true,
     "size_limits_enforced": true,
-    "review_requirements_enforced": true,
-    "github_actor_enforced": true,
-    "github_app_enforced": true
+    "review_requirements_enforced": true
   },
   "mcp": {
     "require_allowlisted_if_present": true
@@ -29,9 +37,104 @@
     "Require code reviews for production merges",
     "Log all repository operations for Verifiable Attestation",
     "Use path allowlists to restrict file access patterns",
-    "Subscribe to status webhooks for instant suspend"
+    "Subscribe to status webhooks for instant suspend",
+    "Implement progressive limits for new agents",
+    "Use automated testing requirements for large changes"
   ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["repository", "action", "branch"],
+    "properties": {
+      "repository": {
+        "type": "string",
+        "pattern": "^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$",
+        "description": "Repository in owner/repo format"
+      },
+      "action": {
+        "type": "string",
+        "enum": [
+          "pr.create",
+          "pr.merge",
+          "pr.update",
+          "branch.create",
+          "branch.delete"
+        ],
+        "description": "Repository action being performed"
+      },
+      "branch": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Target branch name"
+      },
+      "base_branch": {
+        "type": "string",
+        "description": "Base branch for PR operations"
+      },
+      "title": {
+        "type": "string",
+        "maxLength": 200,
+        "description": "PR or commit title"
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 5000,
+        "description": "PR or commit description"
+      },
+      "files_changed": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "List of files being changed"
+      },
+      "lines_added": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Number of lines added"
+      },
+      "lines_removed": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Number of lines removed"
+      }
+    }
+  },
+  "evaluation_rules": [
+    {
+      "name": "passport_status_active",
+      "condition": "passport.status == 'active'",
+      "deny_code": "oap.passport_suspended",
+      "description": "Passport must be active"
+    },
+    {
+      "name": "repo_capability",
+      "condition": "action in passport.capabilities",
+      "deny_code": "oap.unknown_capability",
+      "description": "Agent must have required repository capability"
+    },
+    {
+      "name": "pr_size_limit",
+      "condition": "lines_added + lines_removed <= limits.max_pr_size_kb * 1000",
+      "deny_code": "oap.limit_exceeded",
+      "description": "PR size must not exceed limit"
+    },
+    {
+      "name": "daily_pr_limit",
+      "condition": "daily_pr_count < limits.max_prs_per_day",
+      "deny_code": "oap.limit_exceeded",
+      "description": "Daily PR limit must not be exceeded"
+    },
+    {
+      "name": "daily_merge_limit",
+      "condition": "daily_merge_count < limits.max_merges_per_day",
+      "deny_code": "oap.limit_exceeded",
+      "description": "Daily merge limit must not be exceeded"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
   "deprecation": null,
   "created_at": "2025-01-16T00:00:00Z",
-  "updated_at": "2025-01-16T00:00:00Z"
+  "updated_at": "2025-01-30T00:00:00Z"
 }

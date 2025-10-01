@@ -1,0 +1,99 @@
+{
+  "id": "release.v1",
+  "name": "Release Policy",
+  "description": "Pre-act governance for release operations. Enforces version format, file restrictions, and repository permissions.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["release"],
+  "min_assurance": "L3",
+  "limits_required": [],
+  "required_fields": ["repository", "version", "files"],
+  "optional_fields": ["description", "changelog"],
+  "enforcement": {
+    "version_format_enforced": true,
+    "file_restrictions_enforced": true,
+    "repository_permissions_enforced": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Use semantic versioning for all releases",
+    "Restrict file types to prevent malicious uploads",
+    "Verify repository permissions before allowing releases",
+    "Log all release attempts for audit compliance",
+    "Subscribe to status webhooks for instant suspend"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["repository", "version", "files"],
+    "properties": {
+      "repository": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Repository identifier"
+      },
+      "version": {
+        "type": "string",
+        "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.-]+)?(\\+[a-zA-Z0-9.-]+)?$",
+        "description": "Semantic version number"
+      },
+      "files": {
+        "type": "array",
+        "minItems": 1,
+        "description": "List of files to be released",
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": {
+        "type": "string",
+        "description": "Release description"
+      },
+      "changelog": {
+        "type": "string",
+        "description": "Release changelog"
+      }
+    }
+  },
+  "evaluation_rules": [
+    {
+      "name": "passport_status_active",
+      "condition": "passport.status == 'active'",
+      "deny_code": "oap.passport_suspended",
+      "description": "Passport must be active"
+    },
+    {
+      "name": "assurance_minimum",
+      "condition": "passport.assurance_level >= 'L3'",
+      "deny_code": "oap.assurance_insufficient",
+      "description": "Assurance level must be L3 or higher"
+    },
+    {
+      "name": "version_format_valid",
+      "condition": "version matches semantic versioning pattern",
+      "deny_code": "oap.format_unsupported",
+      "description": "Version must follow semantic versioning"
+    },
+    {
+      "name": "file_extensions_allowed",
+      "condition": "all files have allowed extensions",
+      "deny_code": "oap.file_forbidden",
+      "description": "All files must have allowed extensions"
+    },
+    {
+      "name": "repository_permission",
+      "condition": "agent has release permission for repository",
+      "deny_code": "oap.unknown_capability",
+      "description": "Agent must have release permission for repository"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 300,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2025-01-30T00:00:00Z",
+  "updated_at": "2025-01-30T00:00:00Z"
+}

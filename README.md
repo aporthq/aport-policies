@@ -1,44 +1,154 @@
-# APort Policy Packs
+# Policy Templates and Guidelines
 
-This repository contains the official APort policy packs for agent verification.
+This directory contains OAP-compliant policy definitions and a unified template for creating new policies.
 
-## 📦 Available Policy Packs
+## 📋 **Policy Structure Overview**
 
-| Policy Pack | Description | Use Case | Compliance |
-|-------------|-------------|----------|------------|
-| **refunds.v1** | Payment refund policies | E-commerce, financial services | PCI DSS, SOX |
-| **data_export.v1** | Data export restrictions | GDPR compliance, data privacy | GDPR, CCPA |
-| **messaging.v1** | Communication policies | Chat bots, notifications | CAN-SPAM, TCPA |
-| **repo.v1** | Repository access policies | CI/CD, code management | SOC 2, ISO 27001 |
+All policies follow the Open Agent Protocol (OAP) specification and include:
 
-### Policy Pack Details
+### **Required Fields**
+- `id` - Unique policy identifier (e.g., "payments.charge.v1")
+- `name` - Human-readable policy name
+- `description` - Detailed policy description
+- `version` - Semantic version (e.g., "1.0.0")
+- `status` - Policy status ("active", "draft", "deprecated")
+- `requires_capabilities` - Array of required capabilities
+- `min_assurance` - Minimum assurance level required
+- `limits_required` - Array of required limit keys
+- `required_fields` - Required context fields
+- `optional_fields` - Optional context fields
+- `enforcement` - Policy enforcement rules
+- `mcp` - Model Context Protocol configuration
+- `advice` - Implementation guidance
+- `required_context` - JSON Schema for context validation
+- `evaluation_rules` - OAP-compliant evaluation rules
+- `cache` - Caching configuration
+- `created_at` / `updated_at` - Timestamps
 
-Each policy pack includes:
-- **Policy Rules**: JSON-based policy definitions
-- **Integration Examples**: Express.js and FastAPI middleware
-- **Test Suites**: Automated compliance testing
-- **Documentation**: Complete usage guides
+### **OAP Compliance Features**
+- ✅ **Standardized Error Codes** - Uses `oap.*` error codes
+- ✅ **JSON Schema Validation** - Full context validation
+- ✅ **Nested Limits Structure** - `limits.{capability}.*` format
+- ✅ **Capability-based Authorization** - Proper capability checking
+- ✅ **Assurance Level Validation** - Dynamic assurance requirements
+- ✅ **Idempotency Support** - Duplicate prevention
+- ✅ **Cache Configuration** - TTL and invalidation settings
 
-## 🚀 Usage
+## 🏗️ **Creating New Policies**
 
-```bash
-# Install via pnpm
-pnpm install @aport/policies
+### **1. Use the Template**
+Copy `policy-template.json` and replace placeholders:
+- `{operation}` - Operation name (e.g., "charge", "refund")
+- `{capability.name}` - Capability identifier (e.g., "payments.charge")
+- `{Brief description}` - Policy purpose description
 
-# Or use directly
-curl https://raw.githubusercontent.com/aporthq/aport-policies/main/policies/repo.v1/policy.json
+### **2. Define Context Schema**
+Update `required_context` with your specific fields:
+```json
+{
+  "required": ["field1", "field2"],
+  "properties": {
+    "field1": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Field description"
+    }
+  }
+}
 ```
 
-## 📚 Documentation
+### **3. Add Evaluation Rules**
+Define OAP-compliant evaluation rules:
+```json
+{
+  "name": "rule_name",
+  "condition": "passport.status == 'active'",
+  "deny_code": "oap.passport_suspended",
+  "description": "Rule description"
+}
+```
 
-- [Policy Pack Guide](https://aport.io/docs/policies)
-- [API Reference](https://aport.io/docs/api)
-- [Examples](https://github.com/aporthq/aport-policies/tree/main/examples)
+### **4. Configure Enforcement**
+Set up enforcement rules in the `enforcement` object:
+```json
+{
+  "assurance_required": "limits.{capability}.require_assurance_at_least",
+  "idempotency_required": true,
+  "custom_rule": "limits.{capability}.custom_limit"
+}
+```
 
-## 🤝 Contributing
+## 📊 **Policy Comparison**
 
-Policy packs are maintained in the main APort repository. Changes are automatically published here.
+| **Policy** | **Capability** | **Min Assurance** | **Key Features** |
+|------------|----------------|-------------------|------------------|
+| `payments.charge.v1` | `payments.charge` | L2 | Multi-currency, merchant allowlists, category blocking |
+| `payments.refund.v1` | `payments.refund` | L2 | Cross-currency denial, reason codes, order validation |
+| `data.export.v1` | `data.export` | L1 | Row limits, PII handling, format validation |
+| `messaging.v1` | `messaging.send` | L1 | Rate limiting, channel restrictions, mention policies |
+| `repo.v1` | `repo.pr.create`, `repo.merge` | L2 | PR limits, path restrictions, review requirements |
 
-## 📄 License
+## 🔧 **Implementation Guidelines**
 
-MIT License - see LICENSE file for details.
+### **Error Codes**
+Always use OAP standard error codes:
+- `oap.passport_suspended` - Agent is suspended
+- `oap.assurance_insufficient` - Assurance level too low
+- `oap.unknown_capability` - Missing required capability
+- `oap.limit_exceeded` - Exceeded limits
+- `oap.currency_unsupported` - Unsupported currency
+- `oap.region_blocked` - Region not allowed
+- `oap.idempotency_conflict` - Duplicate idempotency key
+
+### **Limits Structure**
+Use nested limits under capability names:
+```json
+{
+  "limits": {
+    "payments.charge": {
+      "currency_limits": { "USD": { "max_per_tx": 10000 } },
+      "require_assurance_at_least": "L2",
+      "idempotency_required": true
+    }
+  }
+}
+```
+
+### **Evaluation Rules**
+Follow OAP evaluation rule format:
+- Use clear, descriptive names
+- Write conditions in simple expressions
+- Use OAP deny codes
+- Include helpful descriptions
+
+## 🧪 **Testing**
+
+Each policy should include:
+- `tests/passport.template.json` - Template passport
+- `tests/passport.instance.json` - Instance passport
+- `tests/contexts.jsonl` - Test contexts
+- `tests/expected.jsonl` - Expected decisions
+- `tests/{policy-name}.test.js` - JavaScript tests
+- `tests/test_{policy_name}.py` - Python tests
+
+## 📚 **Resources**
+
+- [OAP Specification](../spec/oap/)
+- [Policy Verification API](../functions/api/verify/policy/)
+- [Middleware Examples](../middleware/)
+- [SDK Documentation](../sdk/)
+
+## 🔄 **Migration Guide**
+
+### **From Legacy Policies**
+1. Add missing OAP fields (`status`, `cache`, `evaluation_rules`)
+2. Update error codes to OAP standard (`oap.*`)
+3. Add JSON Schema validation (`required_context`)
+4. Update limits structure to nested format
+5. Add comprehensive evaluation rules
+
+### **Version Updates**
+- Update `version` field
+- Update `updated_at` timestamp
+- Document changes in policy description
+- Maintain backward compatibility where possible
