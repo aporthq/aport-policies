@@ -27,7 +27,7 @@ const { requirePolicy } = require('@aporthq/middleware-express');
 
 // Option 1: Explicit agent ID (preferred)
 app.post('/refunds', 
-  requirePolicy('payments.refund.v1', 'aeebc92d-13fb-4e23-8c3c-1aa82b167da645678'), 
+  requirePolicy('payments.refund.v1', 'ap_128094d345678'), 
   async (req, res) => {
     // Your refund logic here
     // req.policyResult contains the verified passport
@@ -61,7 +61,7 @@ fetch('/refunds', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'X-Agent-Passport-Id': 'aeebc92d-13fb-4e23-8c3c-1aa82b167da645678'  // ← Agent ID passed here
+    'X-Agent-Passport-Id': 'ap_128094d345678'  // ← Agent ID passed here
   },
   body: JSON.stringify({
     amount: 25.00,
@@ -94,7 +94,7 @@ import requests
 response = requests.post('/refunds', 
     headers={
         'Content-Type': 'application/json',
-        'X-Agent-Passport-Id': 'aeebc92d-13fb-4e23-8c3c-1aa82b167da645678'  # ← Agent ID passed here
+        'X-Agent-Passport-Id': 'ap_128094d345678'  # ← Agent ID passed here
     },
     json={
         'amount': 25.00,
@@ -137,7 +137,7 @@ When policy checks fail, you'll receive a `403 Forbidden` with detailed error in
   "code": "MISSING_CAPABILITY",
   "message": "Agent missing required capability: payments.refund",
   "policy_id": "payments.refund.v1",
-  "agent_id": "aeebc92d-13fb-4e23-8c3c-1aa82b167da645678",
+  "agent_id": "ap_128094d345678",
   "upgrade_instructions": "Add 'payments.refund' capability to your passport"
 }
 ```
@@ -176,7 +176,7 @@ When policy checks fail, you'll receive a `403 Forbidden` with detailed error in
 Agents that meet this policy's requirements can display the "Refunds-Ready" badge:
 
 ```markdown
-[![Refunds-Ready](https://api.aport.io/badge/aeebc92d-13fb-4e23-8c3c-1aa82b167da645678.svg)](https://aport.io/agents/aeebc92d-13fb-4e23-8c3c-1aa82b167da645678)
+[![Refunds-Ready](https://api.aport.io/badge/ap_128094d345678.svg)](https://aport.io/agents/ap_128094d345678)
 ```
 
 ## Support
