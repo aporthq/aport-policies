@@ -1,0 +1,59 @@
+{
+  "id": "payments.refund.v1",
+  "name": "Refunds Protection",
+  "description": "Protects refund endpoints with payment capabilities, assurance levels, and transaction limits",
+  "version": "1.0.0",
+  "requires_capabilities": ["payments.refund"],
+  "min_assurance": "L2",
+  "limits_required": [
+    "supported_currencies",
+    "currency_limits",
+    "refund_reason_codes",
+    "regions"
+  ],
+  "enforcement": {
+    "amount_lte": "limits.currency_limits.{currency}.max_per_tx",
+    "currency_supported": "limits.supported_currencies",
+    "region_in": "regions",
+    "reason_code_valid": "limits.refund_reason_codes",
+    "assurance_tier_enforced": "true",
+    "idempotency_required": "true",
+    "order_id_required": "true",
+    "customer_id_required": "true",
+    "cross_currency_denied": "true"
+  },
+  "assurance_rules": [
+    { "lte_minor": 10000, "min_level": "L2" },
+    { "lte_minor": 50000, "min_level": "L3" }
+  ],
+  "required_fields": [
+    "order_id",
+    "customer_id",
+    "amount_minor",
+    "currency",
+    "region",
+    "reason_code",
+    "idempotency_key"
+  ],
+  "optional_fields": [
+    "note",
+    "merchant_case_id",
+    "order_currency",
+    "order_total_minor",
+    "already_refunded_minor"
+  ],
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Log all refund attempts for Verifiable Attestation",
+    "Implement daily spend tracking with atomic counters",
+    "Use idempotency keys to prevent duplicate refunds",
+    "Validate remaining order balance before processing"
+  ],
+  "deprecation": null,
+  "created_at": "2025-01-16T00:00:00Z",
+  "updated_at": "2025-01-16T00:00:00Z"
+}

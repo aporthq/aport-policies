@@ -1,0 +1,28 @@
+{
+  "id": "messaging.v1",
+  "name": "Messaging Protection",
+  "description": "Protects messaging endpoints with rate limits, channel restrictions, and mention policies for PLG on-ramp",
+  "version": "1.0.0",
+  "requires_capabilities": ["messaging.send"],
+  "min_assurance": "L1",
+  "limits_required": ["msgs_per_min", "msgs_per_day"],
+  "enforcement": {
+    "channels_allowlist_enforced": true,
+    "mention_policy_enforced": true,
+    "rate_limits_enforced": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Implement rate limiting per agent and per channel",
+    "Monitor for spam patterns and suspicious activity",
+    "Log all message attempts for Verifiable Attestation",
+    "Consider implementing channel-specific limits",
+    "Use mention policies to prevent @everyone abuse",
+    "Subscribe to status webhooks for instant suspend"
+  ],
+  "deprecation": null,
+  "created_at": "2025-01-16T00:00:00Z",
+  "updated_at": "2025-01-16T00:00:00Z"
+}

@@ -1,0 +1,37 @@
+{
+  "id": "repo.v1",
+  "name": "Repository Safety",
+  "description": "Protects repository operations with PR limits, merge controls, and path restrictions for dev-first safety",
+  "version": "1.0.0",
+  "requires_capabilities": ["repo.pr.create", "repo.merge"],
+  "min_assurance": "L2",
+  "limits_required": [
+    "max_prs_per_day",
+    "max_merges_per_day",
+    "max_pr_size_kb"
+  ],
+  "enforcement": {
+    "allowed_repos_enforced": true,
+    "allowed_base_branches_enforced": true,
+    "path_allowlist_enforced": true,
+    "size_limits_enforced": true,
+    "review_requirements_enforced": true,
+    "github_actor_enforced": true,
+    "github_app_enforced": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Implement repository allowlists to prevent unauthorized access",
+    "Use branch protection rules for critical branches",
+    "Monitor PR size and complexity to prevent oversized changes",
+    "Require code reviews for production merges",
+    "Log all repository operations for Verifiable Attestation",
+    "Use path allowlists to restrict file access patterns",
+    "Subscribe to status webhooks for instant suspend"
+  ],
+  "deprecation": null,
+  "created_at": "2025-01-16T00:00:00Z",
+  "updated_at": "2025-01-16T00:00:00Z"
+}

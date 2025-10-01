@@ -1,0 +1,25 @@
+{
+  "id": "data.export.v1",
+  "name": "Data Export Protection",
+  "description": "Protects data export endpoints with export capabilities, row limits, and PII handling",
+  "version": "1.0.0",
+  "requires_capabilities": ["data.export"],
+  "min_assurance": "L1",
+  "limits_required": ["max_export_rows", "allow_pii"],
+  "enforcement": {
+    "rows_lte": "limits.max_export_rows",
+    "pii_allowed": "limits.allow_pii"
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Implement data retention policies",
+    "Consider Verifiable Attestation for sensitive exports"
+  ],
+  "deprecation": null,
+  "created_at": "2025-01-16T00:00:00Z",
+  "updated_at": "2025-01-16T00:00:00Z"
+}
