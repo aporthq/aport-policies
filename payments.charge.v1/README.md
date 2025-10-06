@@ -31,7 +31,7 @@ const { requirePolicy } = require('@aporthq/middleware-express');
 
 // Option 1: Explicit agent ID (preferred)
 app.post('/payments/charge', 
-  requirePolicy('payments.charge.v1', 'ap_128094d345678'), 
+  requirePolicy('payments.charge.v1', 'ap_a2d10232c6534523812423eec8a1425c45678'), 
   async (req, res) => {
     // Your charge logic here
     // req.policyResult contains the verified passport
@@ -65,7 +65,7 @@ fetch('/payments/charge', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'X-Agent-Passport-Id': 'ap_128094d345678'  // ← Agent ID passed here
+    'X-Agent-Passport-Id': 'ap_a2d10232c6534523812423eec8a1425c45678'  // ← Agent ID passed here
   },
   body: JSON.stringify({
     amount: 1299,
@@ -105,7 +105,7 @@ import requests
 response = requests.post('/payments/charge', 
     headers={
         'Content-Type': 'application/json',
-        'X-Agent-Passport-Id': 'ap_128094d345678'  # ← Agent ID passed here
+        'X-Agent-Passport-Id': 'ap_a2d10232c6534523812423eec8a1425c45678'  # ← Agent ID passed here
     },
     json={
         'amount': 1299,
@@ -160,7 +160,7 @@ When policy checks fail, you'll receive a `403 Forbidden` with detailed error in
   "code": "oap.limit_exceeded",
   "message": "Amount $25.00 exceeds per-transaction limit $20.00",
   "policy_id": "payments.charge.v1",
-  "agent_id": "ap_128094d345678",
+  "agent_id": "ap_a2d10232c6534523812423eec8a1425c45678",
   "upgrade_instructions": "Request higher limits in your passport"
 }
 ```
@@ -213,7 +213,7 @@ When policy checks fail, you'll receive a `403 Forbidden` with detailed error in
 Agents that meet this policy's requirements can display the "Charge-Ready" badge:
 
 ```markdown
-[![Charge-Ready](https://api.aport.io/badge/ap_128094d345678.svg)](https://aport.io/agents/ap_128094d345678)
+[![Charge-Ready](https://api.aport.io/badge/ap_a2d10232c6534523812423eec8a1425c45678.svg)](https://aport.io/agents/ap_a2d10232c6534523812423eec8a1425c45678)
 ```
 
 ## Support

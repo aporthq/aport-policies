@@ -70,7 +70,7 @@ When policy checks fail, you'll receive a `403 Forbidden` with detailed error in
   "code": "EXCEEDS_ROW_LIMIT",
   "message": "Requested 10000 rows exceeds limit 5000",
   "policy_id": "data.export.v1",
-  "agent_id": "ap_128094d345678",
+  "agent_id": "ap_a2d10232c6534523812423eec8a1425c45678",
   "upgrade_instructions": "Request smaller export or upgrade limits"
 }
 ```
@@ -125,7 +125,7 @@ When policy checks fail, you'll receive a `403 Forbidden` with detailed error in
 Agents that meet this policy's requirements can display the "Data Export-Ready" badge:
 
 ```markdown
-[![Data Export-Ready](https://api.aport.io/badge/ap_128094d345678.svg)](https://aport.io/agents/ap_128094d345678)
+[![Data Export-Ready](https://api.aport.io/badge/ap_a2d10232c6534523812423eec8a1425c45678.svg)](https://aport.io/agents/ap_a2d10232c6534523812423eec8a1425c45678)
 ```
 
 ## Support
