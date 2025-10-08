@@ -1,0 +1,12 @@
+{"name":"allow_buy_equity_10k","expected":{"allow":true,"reasons":[{"code":"oap.allowed","message":"Transaction within limits and policy requirements","severity":"info"}]}}
+{"name":"deny_transaction_type_forbidden","expected":{"allow":false,"reasons":[{"code":"oap.action_forbidden","message":"Transaction type short_sell is not allowed","severity":"error"}]}}
+{"name":"deny_asset_class_forbidden","expected":{"allow":false,"reasons":[{"code":"oap.asset_class_forbidden","message":"Asset class commodity is not allowed","severity":"error"}]}}
+{"name":"deny_over_exposure_limit","expected":{"allow":false,"reasons":[{"code":"oap.limit_exceeded","message":"Amount 60000 exceeds maximum exposure limit 50000","severity":"error"}]}}
+{"name":"deny_restricted_account_type","expected":{"allow":false,"reasons":[{"code":"oap.account_type_restricted","message":"Source account type trust_funds is restricted","severity":"error"}]}}
+{"name":"deny_account_type_not_allowed","expected":{"allow":false,"reasons":[{"code":"oap.account_type_restricted","message":"Source account type retirement is not allowed","severity":"error"}]}}
+{"name":"deny_commingling_funds","expected":{"allow":false,"reasons":[{"code":"oap.commingling_of_funds_forbidden","message":"Cannot transfer from client funds to proprietary accounts","severity":"error"}]}}
+{"name":"allow_sell_bond_5k","expected":{"allow":true,"reasons":[{"code":"oap.allowed","message":"Transaction within limits and policy requirements","severity":"info"}]}}
+{"name":"allow_transfer_crypto_2k","expected":{"allow":true,"reasons":[{"code":"oap.allowed","message":"Transaction within limits and policy requirements","severity":"info"}]}}
+{"name":"deny_counterparty_exposure_exceeded","expected":{"allow":false,"reasons":[{"code":"oap.counterparty_limit_exceeded","message":"Amount 250000 exceeds counterparty exposure limit 200000","severity":"error"}]}}
+{"name":"deny_missing_required_fields","expected":{"allow":false,"reasons":[{"code":"oap.invalid_context","message":"Missing required fields: source_account_id, destination_account_id","severity":"error"}]}}
+{"name":"allow_cash_transfer_1k","expected":{"allow":true,"reasons":[{"code":"oap.allowed","message":"Transaction within limits and policy requirements","severity":"info"}]}}

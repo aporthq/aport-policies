@@ -1,0 +1,186 @@
+{
+  "id": "governance.data.access.v1",
+  "name": "Data Access Governance Policy",
+  "description": "Pre-act governance for agent-initiated data access. Enforces controls based on data classification, sensitivity, entity access rights, and jurisdictional boundaries.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["data.access"],
+  "min_assurance": "L3",
+  "limits_required": [
+    "allowed_classifications",
+    "permissions",
+    "allowed_jurisdictions",
+    "max_rows_per_export",
+    "allowed_destination_jurisdictions",
+    "balance_inquiry_cap_usd"
+  ],
+  "required_fields": [
+    "data_classification",
+    "accessing_entity_id",
+    "accessing_entity_type",
+    "resource_id"
+  ],
+  "optional_fields": [
+    "action_type",
+    "jurisdiction",
+    "row_count",
+    "destination_jurisdiction",
+    "resource_attributes"
+  ],
+  "enforcement": {
+    "classification_allowed": true,
+    "entity_type_allowed": true,
+    "jurisdiction_check": true,
+    "row_limit_enforced": true,
+    "data_locality_enforced": true,
+    "balance_inquiry_limited": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Log all data access attempts for Verifiable Attestation",
+    "Implement data classification tagging for all resources",
+    "Maintain entity access matrices for different data types",
+    "Use jurisdiction-aware data routing for compliance",
+    "Implement progressive disclosure for sensitive data access",
+    "Monitor access patterns for unusual behavior",
+    "Maintain audit trails for all data access operations",
+    "Use encryption for data in transit and at rest",
+    "Implement data retention policies based on classification"
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": [
+      "data_classification",
+      "accessing_entity_id",
+      "accessing_entity_type",
+      "resource_id"
+    ],
+    "properties": {
+      "data_classification": {
+        "type": "string",
+        "description": "The classification of the data being accessed (e.g., 'PII', 'Financial', 'HR', 'ClientTier1')."
+      },
+      "accessing_entity_id": {
+        "type": "string",
+        "description": "The unique ID of the entity (user, agent, employee) attempting the access."
+      },
+      "accessing_entity_type": {
+        "type": "string",
+        "enum": ["employee", "client", "system_agent"],
+        "description": "The type of entity attempting the access."
+      },
+      "resource_id": {
+        "type": "string",
+        "description": "The unique ID of the data resource being accessed (e.g., account number, user profile ID)."
+      },
+      "action_type": {
+        "type": "string",
+        "enum": ["read", "export", "delete", "update"],
+        "default": "read",
+        "description": "The type of data access action being performed."
+      },
+      "jurisdiction": {
+        "type": "string",
+        "pattern": "^[A-Z]{2}$",
+        "description": "The ISO 3166-1 alpha-2 country code relevant to the data's jurisdiction."
+      },
+      "row_count": {
+        "type": "integer",
+        "description": "The number of rows/records being accessed or exported. Solves for Row Limits."
+      },
+      "destination_jurisdiction": {
+        "type": "string",
+        "pattern": "^[A-Z]{2}$",
+        "description": "The destination country code for data transfers. Solves for Data Locality."
+      },
+      "resource_attributes": {
+        "type": "object",
+        "description": "A flexible object for passing specific attributes of the resource being accessed. Solves for Balance Inquiry.",
+        "properties": {
+          "account_balance_usd": {
+            "type": "integer",
+            "description": "The balance of the account in USD minor units, used for balance-based access rules."
+          }
+        }
+      }
+    }
+  },
+  "evaluation_rules": [
+    {
+      "name": "passport_status_active",
+      "condition": "passport.status == 'active'",
+      "deny_code": "oap.passport_suspended"
+    },
+    {
+      "name": "assurance_minimum",
+      "condition": "passport.assurance_level >= policy.min_assurance",
+      "deny_code": "oap.assurance_insufficient"
+    },
+    {
+      "name": "classification_allowed",
+      "condition": "context.data_classification in passport.limits.data.access.allowed_classifications",
+      "deny_code": "oap.classification_forbidden"
+    },
+    {
+      "name": "entity_type_allowed_for_action",
+      "condition": "context.accessing_entity_type in passport.limits.data.access.permissions[context.data_classification].allowed_entity_types",
+      "deny_code": "oap.entity_type_forbidden"
+    },
+    {
+      "name": "jurisdiction_check",
+      "condition": "context.jurisdiction in passport.limits.data.access.allowed_jurisdictions",
+      "deny_code": "oap.jurisdiction_blocked"
+    },
+    {
+      "name": "row_limit_check",
+      "condition": "context.row_count <= passport.limits.data.access.max_rows_per_export",
+      "deny_code": "oap.row_limit_exceeded",
+      "description": "Ensures the number of records in an export does not exceed the defined cap."
+    },
+    {
+      "name": "data_locality_check",
+      "condition": "context.destination_jurisdiction in passport.limits.data.access.allowed_destination_jurisdictions",
+      "deny_code": "oap.jurisdiction_blocked",
+      "description": "Restricts international transfers of sensitive data to approved jurisdictions."
+    },
+    {
+      "name": "balance_inquiry_limit",
+      "condition": "not context.resource_attributes.account_balance_usd or context.resource_attributes.account_balance_usd < passport.limits.data.access.balance_inquiry_cap_usd",
+      "deny_code": "oap.balance_inquiry_forbidden",
+      "description": "Limits agent access to view high-net-worth client balances."
+    },
+    {
+      "name": "assurance_minimum",
+      "condition": "passport.assurance_level >= policy.min_assurance",
+      "deny_code": "oap.assurance_insufficient",
+      "description": "Assurance level must meet minimum requirement for data access."
+    },
+    {
+      "name": "action_type_allowed",
+      "condition": "context.action_type in passport.limits.data.access.permissions[context.data_classification].allowed_actions",
+      "deny_code": "oap.action_forbidden",
+      "description": "Action type must be allowed for the data classification."
+    },
+    {
+      "name": "entity_access_frequency_check",
+      "condition": "entity_access_count[context.accessing_entity_id] < passport.limits.data.access.max_access_attempts_per_hour",
+      "deny_code": "oap.access_frequency_exceeded",
+      "description": "Entity access frequency must not exceed hourly limits."
+    },
+    {
+      "name": "data_retention_check",
+      "condition": "context.data_timestamp and (now() - to_timestamp(context.data_timestamp)) <= passport.limits.data.access.max_data_age_seconds",
+      "deny_code": "oap.data_expired",
+      "description": "Data must not be older than retention policy allows."
+    }
+  ]
+}

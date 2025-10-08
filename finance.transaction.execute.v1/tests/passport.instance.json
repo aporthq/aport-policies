@@ -1,0 +1,42 @@
+{
+  "passport_id": "ap_a2d10232c6534523812423eec8a1425c45678",
+  "kind": "instance",
+  "spec_version": "oap/1.0",
+  "owner_id": "org_demo_co",
+  "owner_type": "org",
+  "assurance_level": "L3",
+  "status": "active",
+  "capabilities": [
+    {
+      "id": "finance.transaction",
+      "params": {
+        "max_amount": 100000,
+        "currency": "USD"
+      }
+    }
+  ],
+  "limits": {
+    "finance.transaction": {
+      "allowed_transaction_types": ["buy", "sell", "transfer"],
+      "allowed_asset_classes": ["equity", "bond", "crypto", "cash"],
+      "max_exposure_per_tx_usd": 50000,
+      "allowed_source_account_types": [
+        "client_funds",
+        "trading",
+        "proprietary"
+      ],
+      "restricted_source_account_types": ["trust_funds", "retirement"],
+      "max_exposure_per_counterparty_usd": 200000,
+      "require_assurance_at_least": "L3",
+      "idempotency_required": true
+    }
+  },
+  "regions": ["US", "CA", "EU"],
+  "metadata": {
+    "template_name": "Demo Transaction Agent",
+    "description": "Instance for financial transaction operations"
+  },
+  "created_at": "2025-01-30T00:00:00Z",
+  "updated_at": "2025-01-30T00:00:00Z",
+  "version": "1.0.0"
+}
