@@ -1,10 +1,10 @@
 # Policy Templates and Guidelines
 
-This directory contains OAP-compliant policy definitions and a unified template for creating new policies.
+This directory contains Open Agent Protocol (OAP)-compliant policy definitions and a unified template for creating new policies.
 
 ## 📋 **Policy Structure Overview**
 
-All policies follow the Open Agent Protocol (OAP) specification and include:
+All policies follow the [Open Agent Protocol (OAP)](https://aport.io/spec/) specification and include:
 
 ### **Required Fields**
 - `id` - Unique policy identifier (e.g., "finance.payment.charge.v1")
