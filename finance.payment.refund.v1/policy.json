@@ -30,7 +30,7 @@
   "required_fields": [
     "order_id",
     "customer_id",
-    "amount_minor",
+    "amount",
     "currency",
     "region",
     "reason_code",
@@ -62,7 +62,7 @@
     "required": [
       "order_id",
       "customer_id",
-      "amount_minor",
+      "amount",
       "currency",
       "region",
       "reason_code",
@@ -79,7 +79,7 @@
         "minLength": 1,
         "description": "Customer identifier"
       },
-      "amount_minor": {
+      "amount": {
         "type": "integer",
         "minimum": 1,
         "description": "Refund amount in minor units (e.g., cents)"
@@ -136,7 +136,7 @@
     },
     {
       "name": "assurance_minimum",
-      "condition": "passport.assurance_level >= getRequiredAssuranceLevel(amount_minor, currency)",
+      "condition": "passport.assurance_level >= getRequiredAssuranceLevel(amount, currency)",
       "deny_code": "oap.assurance_insufficient",
       "description": "Assurance level must meet minimum requirement based on amount"
     },
@@ -148,7 +148,7 @@
     },
     {
       "name": "per_tx_amount_cap",
-      "condition": "amount_minor <= limits.currency_limits[currency].max_per_tx",
+      "condition": "amount <= limits.currency_limits[currency].max_per_tx",
       "deny_code": "oap.limit_exceeded",
       "description": "Amount must not exceed per-transaction limit"
     },
@@ -166,7 +166,7 @@
     },
     {
       "name": "daily_cap_check",
-      "condition": "daily_total + amount_minor <= limits.currency_limits[currency].daily_cap",
+      "condition": "daily_total + amount <= limits.currency_limits[currency].daily_cap",
       "deny_code": "oap.limit_exceeded",
       "description": "Daily cap must not be exceeded"
     },
