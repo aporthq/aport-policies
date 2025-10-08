@@ -1,0 +1,12 @@
+{"name":"allow_pii_read_employee","expected":{"allow":true,"reasons":[{"code":"oap.allowed","message":"Data access within limits and policy requirements","severity":"info"}]}}
+{"name":"deny_classification_forbidden","expected":{"allow":false,"reasons":[{"code":"oap.classification_forbidden","message":"Data classification Sensitive is not allowed","severity":"error"}]}}
+{"name":"deny_entity_type_forbidden","expected":{"allow":false,"reasons":[{"code":"oap.entity_type_forbidden","message":"Entity type client is not allowed for HR data","severity":"error"}]}}
+{"name":"deny_jurisdiction_blocked","expected":{"allow":false,"reasons":[{"code":"oap.jurisdiction_blocked","message":"Jurisdiction CN is not allowed","severity":"error"}]}}
+{"name":"deny_row_limit_exceeded","expected":{"allow":false,"reasons":[{"code":"oap.row_limit_exceeded","message":"Row count 15000 exceeds maximum allowed 10000","severity":"error"}]}}
+{"name":"deny_destination_jurisdiction_blocked","expected":{"allow":false,"reasons":[{"code":"oap.jurisdiction_blocked","message":"Destination jurisdiction CN is not allowed","severity":"error"}]}}
+{"name":"deny_balance_inquiry_forbidden","expected":{"allow":false,"reasons":[{"code":"oap.balance_inquiry_forbidden","message":"Account balance 150000 exceeds inquiry cap 100000","severity":"error"}]}}
+{"name":"allow_financial_export_system_agent","expected":{"allow":true,"reasons":[{"code":"oap.allowed","message":"Data access within limits and policy requirements","severity":"info"}]}}
+{"name":"allow_client_tier1_read","expected":{"allow":true,"reasons":[{"code":"oap.allowed","message":"Data access within limits and policy requirements","severity":"info"}]}}
+{"name":"deny_action_forbidden","expected":{"allow":false,"reasons":[{"code":"oap.action_forbidden","message":"Action type delete is not allowed for HR data","severity":"error"}]}}
+{"name":"allow_hr_read_employee","expected":{"allow":true,"reasons":[{"code":"oap.allowed","message":"Data access within limits and policy requirements","severity":"info"}]}}
+{"name":"deny_missing_required_fields","expected":{"allow":false,"reasons":[{"code":"oap.invalid_context","message":"Missing required fields: accessing_entity_type, resource_id","severity":"error"}]}}

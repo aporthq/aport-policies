@@ -1,0 +1,111 @@
+{
+  "id": "data.export.create.v1",
+  "name": "Data Export Protection Policy",
+  "description": "Pre-act governance for data export operations. Enforces row limits, PII handling requirements, and export capability validation.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["data.export"],
+  "min_assurance": "L1",
+  "limits_required": ["max_export_rows", "allow_pii"],
+  "required_fields": ["export_type", "format", "filters"],
+  "optional_fields": ["include_pii", "date_range", "columns"],
+  "enforcement": {
+    "rows_lte": "limits.data.export.max_export_rows",
+    "pii_allowed": "limits.data.export.allow_pii"
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Implement data retention policies",
+    "Consider Verifiable Attestation for sensitive exports",
+    "Log all export attempts for audit compliance",
+    "Implement progressive disclosure for large datasets",
+    "Use secure delivery methods for sensitive data"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["export_type", "format", "filters"],
+    "properties": {
+      "export_type": {
+        "type": "string",
+        "enum": ["users", "orders", "transactions", "analytics"],
+        "description": "Type of data to export"
+      },
+      "format": {
+        "type": "string",
+        "enum": ["csv", "json", "xlsx", "parquet"],
+        "description": "Export format"
+      },
+      "filters": {
+        "type": "object",
+        "description": "Filter criteria for the export",
+        "properties": {
+          "date_from": { "type": "string", "format": "date" },
+          "date_to": { "type": "string", "format": "date" },
+          "status": { "type": "string" },
+          "category": { "type": "string" }
+        }
+      },
+      "include_pii": {
+        "type": "boolean",
+        "description": "Whether to include personally identifiable information"
+      },
+      "date_range": {
+        "type": "object",
+        "description": "Date range for the export",
+        "properties": {
+          "start": { "type": "string", "format": "date" },
+          "end": { "type": "string", "format": "date" }
+        }
+      },
+      "columns": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Specific columns to include"
+      }
+    }
+  },
+  "evaluation_rules": [
+    {
+      "name": "passport_status_active",
+      "condition": "passport.status == 'active'",
+      "deny_code": "oap.passport_suspended",
+      "description": "Passport must be active"
+    },
+    {
+      "name": "export_capability",
+      "condition": "'data.export' in passport.capabilities",
+      "deny_code": "oap.unknown_capability",
+      "description": "Agent must have data.export capability"
+    },
+    {
+      "name": "row_limit_check",
+      "condition": "estimated_rows <= limits.max_export_rows",
+      "deny_code": "oap.limit_exceeded",
+      "description": "Export size must not exceed row limit"
+    },
+    {
+      "name": "pii_handling",
+      "condition": "NOT (include_pii AND NOT limits.allow_pii)",
+      "deny_code": "oap.pii_not_allowed",
+      "description": "PII export not allowed for this agent"
+    },
+    {
+      "name": "format_support",
+      "condition": "format in ['csv', 'json', 'xlsx', 'parquet']",
+      "deny_code": "oap.format_unsupported",
+      "description": "Export format must be supported"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2025-01-16T00:00:00Z",
+  "updated_at": "2025-01-30T00:00:00Z"
+}

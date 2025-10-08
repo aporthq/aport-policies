@@ -1,0 +1,193 @@
+{
+  "id": "finance.payment.refund.v1",
+  "name": "Refunds Protection Policy",
+  "description": "Post-act governance for refund operations. Enforces per-currency caps, reason code validation, cross-currency restrictions, and idempotency.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["finance.payment.refund"],
+  "min_assurance": "L2",
+  "limits_required": [
+    "supported_currencies",
+    "currency_limits",
+    "refund_reason_codes",
+    "regions"
+  ],
+  "enforcement": {
+    "amount_lte": "limits.finance.payment.refund.currency_limits.{currency}.max_per_tx",
+    "currency_supported": "limits.finance.payment.refund.supported_currencies",
+    "region_in": "regions",
+    "reason_code_valid": "limits.finance.payment.refund.refund_reason_codes",
+    "assurance_tier_enforced": "true",
+    "idempotency_required": "true",
+    "order_id_required": "true",
+    "customer_id_required": "true",
+    "cross_currency_denied": "true"
+  },
+  "assurance_rules": [
+    { "lte_minor": 10000, "min_level": "L2" },
+    { "lte_minor": 50000, "min_level": "L3" }
+  ],
+  "required_fields": [
+    "order_id",
+    "customer_id",
+    "amount_minor",
+    "currency",
+    "region",
+    "reason_code",
+    "idempotency_key"
+  ],
+  "optional_fields": [
+    "note",
+    "merchant_case_id",
+    "order_currency",
+    "order_total_minor",
+    "already_refunded_minor"
+  ],
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Log all refund attempts for Verifiable Attestation",
+    "Implement daily spend tracking with atomic counters",
+    "Use idempotency keys to prevent duplicate refunds",
+    "Validate remaining order balance before processing",
+    "Enforce reason code validation for compliance",
+    "Block cross-currency refunds to prevent abuse"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": [
+      "order_id",
+      "customer_id",
+      "amount_minor",
+      "currency",
+      "region",
+      "reason_code",
+      "idempotency_key"
+    ],
+    "properties": {
+      "order_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Original order identifier"
+      },
+      "customer_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Customer identifier"
+      },
+      "amount_minor": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Refund amount in minor units (e.g., cents)"
+      },
+      "currency": {
+        "type": "string",
+        "pattern": "^[A-Z]{3}$",
+        "description": "ISO 4217 currency code"
+      },
+      "region": {
+        "type": "string",
+        "description": "Geographic region"
+      },
+      "reason_code": {
+        "type": "string",
+        "description": "Refund reason code"
+      },
+      "idempotency_key": {
+        "type": "string",
+        "minLength": 8,
+        "description": "Idempotency key for duplicate prevention"
+      },
+      "note": {
+        "type": "string",
+        "description": "Optional refund note"
+      },
+      "merchant_case_id": {
+        "type": "string",
+        "description": "Merchant's internal case ID"
+      },
+      "order_currency": {
+        "type": "string",
+        "pattern": "^[A-Z]{3}$",
+        "description": "Original order currency"
+      },
+      "order_total_minor": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Original order total in minor units"
+      },
+      "already_refunded_minor": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Amount already refunded in minor units"
+      }
+    }
+  },
+  "evaluation_rules": [
+    {
+      "name": "passport_status_active",
+      "condition": "passport.status == 'active'",
+      "deny_code": "oap.passport_suspended",
+      "description": "Passport must be active"
+    },
+    {
+      "name": "assurance_minimum",
+      "condition": "passport.assurance_level >= getRequiredAssuranceLevel(amount_minor, currency)",
+      "deny_code": "oap.assurance_insufficient",
+      "description": "Assurance level must meet minimum requirement based on amount"
+    },
+    {
+      "name": "currency_supported",
+      "condition": "currency in limits.supported_currencies",
+      "deny_code": "oap.currency_unsupported",
+      "description": "Currency must be supported"
+    },
+    {
+      "name": "per_tx_amount_cap",
+      "condition": "amount_minor <= limits.currency_limits[currency].max_per_tx",
+      "deny_code": "oap.limit_exceeded",
+      "description": "Amount must not exceed per-transaction limit"
+    },
+    {
+      "name": "reason_code_valid",
+      "condition": "reason_code in limits.refund_reason_codes",
+      "deny_code": "oap.invalid_reason_code",
+      "description": "Reason code must be valid"
+    },
+    {
+      "name": "cross_currency_check",
+      "condition": "NOT (order_currency AND currency != order_currency)",
+      "deny_code": "oap.cross_currency_denied",
+      "description": "Cross-currency refunds are not allowed"
+    },
+    {
+      "name": "daily_cap_check",
+      "condition": "daily_total + amount_minor <= limits.currency_limits[currency].daily_cap",
+      "deny_code": "oap.limit_exceeded",
+      "description": "Daily cap must not be exceeded"
+    },
+    {
+      "name": "idempotency_check",
+      "condition": "idempotency_key not in recent_keys",
+      "deny_code": "oap.idempotency_conflict",
+      "description": "Idempotency key must be unique"
+    },
+    {
+      "name": "region_authorization",
+      "condition": "region in passport.regions",
+      "deny_code": "oap.region_blocked",
+      "description": "Region must be authorized"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2025-01-16T00:00:00Z",
+  "updated_at": "2025-01-30T00:00:00Z"
+}

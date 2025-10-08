@@ -1,0 +1,56 @@
+{
+  "passport_id": "550e8400-e29b-41d4-a716-446655440002",
+  "kind": "template",
+  "spec_version": "oap/1.0",
+  "owner_id": "org_demo_co",
+  "owner_type": "org",
+  "assurance_level": "L3",
+  "status": "active",
+  "capabilities": [
+    {
+      "id": "data.access",
+      "params": {
+        "max_classifications": 5,
+        "max_rows_per_export": 10000
+      }
+    }
+  ],
+  "limits": {
+    "data.access": {
+      "allowed_classifications": ["PII", "Financial", "HR", "ClientTier1"],
+      "permissions": {
+        "PII": {
+          "allowed_entity_types": ["employee", "system_agent"],
+          "allowed_actions": ["read", "export"]
+        },
+        "Financial": {
+          "allowed_entity_types": ["employee", "system_agent"],
+          "allowed_actions": ["read", "export"]
+        },
+        "HR": {
+          "allowed_entity_types": ["employee"],
+          "allowed_actions": ["read"]
+        },
+        "ClientTier1": {
+          "allowed_entity_types": ["employee", "client"],
+          "allowed_actions": ["read", "export"]
+        }
+      },
+      "allowed_jurisdictions": ["US", "CA", "EU"],
+      "max_rows_per_export": 10000,
+      "allowed_destination_jurisdictions": ["US", "CA", "EU"],
+      "balance_inquiry_cap_usd": 100000,
+      "max_access_attempts_per_hour": 100,
+      "max_data_age_seconds": 86400,
+      "require_assurance_at_least": "L3"
+    }
+  },
+  "regions": ["US", "CA", "EU"],
+  "metadata": {
+    "template_name": "Demo Data Access Template",
+    "description": "Template for data access governance operations"
+  },
+  "created_at": "2025-01-30T00:00:00Z",
+  "updated_at": "2025-01-30T00:00:00Z",
+  "version": "1.0.0"
+}
