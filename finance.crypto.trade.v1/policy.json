@@ -1,0 +1,154 @@
+{
+  "id": "finance.crypto.trade.v1",
+  "name": "Crypto Asset Trading Policy",
+  "description": "Pre-act governance for agent-initiated crypto asset trades. Enforces rules on specific tokens, exchanges, wallet types, and transaction value.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["finance.crypto.trade"],
+  "min_assurance": "L3",
+  "limits_required": [
+    "allowed_exchanges",
+    "allowed_tokens",
+    "max_trade_size_usd",
+    "max_hot_wallet_trade_usd",
+    "max_daily_trade_volume_usd",
+    "max_trades_per_day"
+  ],
+  "required_fields": ["exchange_id", "pair", "side", "amount_usd"],
+  "optional_fields": [
+    "source_wallet_type",
+    "idempotency_key",
+    "trade_reason",
+    "risk_score"
+  ],
+  "enforcement": {
+    "exchange_allowed": true,
+    "token_allowed": true,
+    "trade_size_limit": true,
+    "hot_wallet_limit": true,
+    "daily_volume_limit": true,
+    "trade_frequency_limit": true,
+    "idempotency_required": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Log all crypto trade attempts for Verifiable Attestation",
+    "Implement real-time price validation before trade execution",
+    "Use cold storage for large amounts and hot wallets for small trades",
+    "Monitor exchange connectivity and implement circuit breakers",
+    "Implement slippage protection for volatile markets",
+    "Use unique idempotency keys to prevent duplicate trades",
+    "Maintain exchange allowlists for trusted platforms only",
+    "Implement progressive limits for new trading pairs",
+    "Monitor for unusual trading patterns and potential manipulation",
+    "Use multi-signature wallets for high-value transactions"
+  ],
+  "cache": {
+    "default_ttl_seconds": 30,
+    "suspend_invalidate_seconds": 15
+  },
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["exchange_id", "pair", "side", "amount_usd"],
+    "properties": {
+      "exchange_id": {
+        "type": "string",
+        "description": "The exchange where the trade is being executed (e.g., 'coinbase', 'binance')."
+      },
+      "pair": {
+        "type": "string",
+        "pattern": "^[A-Z]+-[A-Z]+$",
+        "description": "The trading pair (e.g., 'BTC-USD')."
+      },
+      "side": {
+        "type": "string",
+        "enum": ["buy", "sell"],
+        "description": "The side of the trade."
+      },
+      "amount_usd": {
+        "type": "integer",
+        "description": "The total value of the trade in USD minor units (cents)."
+      },
+      "source_wallet_type": {
+        "type": "string",
+        "enum": ["hot", "cold", "custodial"],
+        "description": "The type of wallet initiating the trade."
+      }
+    }
+  },
+  "evaluation_rules": [
+    {
+      "name": "passport_status_active",
+      "condition": "passport.status == 'active'",
+      "deny_code": "oap.passport_suspended"
+    },
+    {
+      "name": "exchange_is_allowed",
+      "condition": "context.exchange_id in passport.limits.finance.crypto.trade.allowed_exchanges",
+      "deny_code": "oap.exchange_forbidden"
+    },
+    {
+      "name": "token_is_allowed",
+      "condition": "all(token in passport.limits.finance.crypto.trade.allowed_tokens for token in context.pair.split('-'))",
+      "deny_code": "oap.token_forbidden"
+    },
+    {
+      "name": "trade_size_limit_check",
+      "condition": "context.amount_usd <= passport.limits.finance.crypto.trade.max_trade_size_usd",
+      "deny_code": "oap.limit_exceeded"
+    },
+    {
+      "name": "hot_wallet_limit_check",
+      "condition": "not (context.source_wallet_type == 'hot' and context.amount_usd > passport.limits.finance.crypto.trade.max_hot_wallet_trade_usd)",
+      "deny_code": "oap.wallet_limit_exceeded",
+      "description": "Hot wallet trades must not exceed maximum allowed amount."
+    },
+    {
+      "name": "assurance_minimum",
+      "condition": "passport.assurance_level >= policy.min_assurance",
+      "deny_code": "oap.assurance_insufficient",
+      "description": "Assurance level must meet minimum requirement for crypto trading."
+    },
+    {
+      "name": "daily_volume_limit_check",
+      "condition": "daily_volume_total + context.amount_usd <= passport.limits.finance.crypto.trade.max_daily_trade_volume_usd",
+      "deny_code": "oap.daily_volume_exceeded",
+      "description": "Daily trading volume must not exceed limit."
+    },
+    {
+      "name": "trade_frequency_check",
+      "condition": "trades_today_count < passport.limits.finance.crypto.trade.max_trades_per_day",
+      "deny_code": "oap.trade_frequency_exceeded",
+      "description": "Number of trades per day must not exceed limit."
+    },
+    {
+      "name": "idempotency_check",
+      "condition": "context.idempotency_key not in recent_keys",
+      "deny_code": "oap.idempotency_conflict",
+      "description": "Idempotency key must be unique to prevent duplicate trades."
+    },
+    {
+      "name": "pair_volatility_check",
+      "condition": "context.risk_score <= passport.limits.finance.crypto.trade.max_risk_score OR not context.risk_score",
+      "deny_code": "oap.risk_score_exceeded",
+      "description": "Trade risk score must not exceed maximum allowed."
+    },
+    {
+      "name": "exchange_connectivity_check",
+      "condition": "exchange_status[context.exchange_id] == 'online'",
+      "deny_code": "oap.exchange_offline",
+      "description": "Exchange must be online and accessible."
+    },
+    {
+      "name": "market_hours_check",
+      "condition": "is_market_open(context.exchange_id) OR context.side == 'sell'",
+      "deny_code": "oap.market_closed",
+      "description": "Trades must be during market hours unless selling."
+    }
+  ]
+}

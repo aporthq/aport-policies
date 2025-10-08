@@ -7,7 +7,7 @@ This directory contains OAP-compliant policy definitions and a unified template 
 All policies follow the Open Agent Protocol (OAP) specification and include:
 
 ### **Required Fields**
-- `id` - Unique policy identifier (e.g., "payments.charge.v1")
+- `id` - Unique policy identifier (e.g., "finance.payment.charge.v1")
 - `name` - Human-readable policy name
 - `description` - Detailed policy description
 - `version` - Semantic version (e.g., "1.0.0")
@@ -82,11 +82,11 @@ Set up enforcement rules in the `enforcement` object:
 
 | **Policy** | **Capability** | **Min Assurance** | **Key Features** |
 |------------|----------------|-------------------|------------------|
-| `payments.charge.v1` | `payments.charge` | L2 | Multi-currency, merchant allowlists, category blocking |
-| `payments.refund.v1` | `payments.refund` | L2 | Cross-currency denial, reason codes, order validation |
-| `data.export.v1` | `data.export` | L1 | Row limits, PII handling, format validation |
-| `messaging.v1` | `messaging.send` | L1 | Rate limiting, channel restrictions, mention policies |
-| `repo.v1` | `repo.pr.create`, `repo.merge` | L2 | PR limits, path restrictions, review requirements |
+| `finance.payment.charge.v1` | `payments.charge` | L2 | Multi-currency, merchant allowlists, category blocking |
+| `finance.payment.refund.v1` | `finance.payment.refund` | L2 | Cross-currency denial, reason codes, order validation |
+| `data.export.create.v1` | `data.export` | L1 | Row limits, PII handling, format validation |
+| `messaging.message.send.v1` | `messaging.send` | L1 | Rate limiting, channel restrictions, mention policies |
+| `code.repository.merge.v1` | `repo.pr.create`, `repo.merge` | L2 | PR limits, path restrictions, review requirements |
 
 ## 🔧 **Implementation Guidelines**
 
@@ -152,3 +152,7 @@ Each policy should include:
 - Update `updated_at` timestamp
 - Document changes in policy description
 - Maintain backward compatibility where possible
+
+---
+
+**Last Updated**: 2025-10-08 14:54:16 UTC

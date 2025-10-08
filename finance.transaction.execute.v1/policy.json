@@ -1,0 +1,166 @@
+{
+  "id": "finance.transaction.execute.v1",
+  "name": "Financial Transaction Execution Policy",
+  "description": "Pre-act governance for agent-initiated financial transactions like trades or transfers. Enforces rules on asset classes, exposure limits, and account types.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["finance.transaction"],
+  "min_assurance": "L3",
+  "limits_required": [
+    "allowed_transaction_types",
+    "allowed_asset_classes",
+    "max_exposure_per_tx_usd",
+    "allowed_source_account_types",
+    "restricted_source_account_types",
+    "max_exposure_per_counterparty_usd"
+  ],
+  "required_fields": [
+    "transaction_type",
+    "amount",
+    "currency",
+    "asset_class",
+    "source_account_id",
+    "destination_account_id"
+  ],
+  "optional_fields": [
+    "source_account_type",
+    "idempotency_key",
+    "destination_account_type",
+    "counterparty_id"
+  ],
+  "enforcement": {
+    "transaction_type_allowed": true,
+    "asset_class_allowed": true,
+    "exposure_limit_enforced": true,
+    "account_segregation_enforced": true,
+    "segregation_of_funds_enforced": true,
+    "counterparty_exposure_enforced": true,
+    "idempotency_required": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Log all transaction attempts for Verifiable Attestation",
+    "Implement daily exposure tracking per counterparty to prevent concentration risk",
+    "Always use unique idempotency keys to prevent duplicate transactions",
+    "Maintain strict segregation between client and proprietary funds",
+    "Monitor counterparty exposure limits to prevent over-concentration",
+    "Implement real-time balance checks before transaction execution",
+    "Use progressive limits for new counterparties",
+    "Maintain audit trails for all financial transactions"
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": [
+      "transaction_type",
+      "amount",
+      "currency",
+      "asset_class",
+      "source_account_id",
+      "destination_account_id"
+    ],
+    "properties": {
+      "transaction_type": {
+        "type": "string",
+        "enum": ["buy", "sell", "transfer", "short_sell"],
+        "description": "The type of financial transaction being executed."
+      },
+      "amount": {
+        "type": "integer",
+        "description": "Transaction amount in minor units (e.g., cents)."
+      },
+      "currency": {
+        "type": "string",
+        "pattern": "^[A-Z]{3}$",
+        "description": "ISO 4217 currency code."
+      },
+      "asset_class": {
+        "type": "string",
+        "description": "The class of the asset being transacted (e.g., 'equity', 'bond', 'crypto', 'cash')."
+      },
+      "source_account_id": {
+        "type": "string",
+        "description": "The ID of the account from which funds/assets are being moved."
+      },
+      "source_account_type": {
+        "type": "string",
+        "description": "The type of the source account (e.g., 'client_funds', 'trust_funds', 'proprietary')."
+      },
+      "destination_account_id": {
+        "type": "string",
+        "description": "The ID of the destination account."
+      },
+      "idempotency_key": {
+        "type": "string",
+        "description": "Idempotency key to prevent duplicate transactions."
+      },
+      "destination_account_type": {
+        "type": "string",
+        "description": "The type of the destination account (e.g., 'client_funds', 'proprietary'). Solves for Segregation of Funds."
+      },
+      "counterparty_id": {
+        "type": "string",
+        "description": "A unique identifier for the counterparty in a trade. Solves for Counterparty Exposure."
+      }
+    }
+  },
+  "evaluation_rules": [
+    {
+      "name": "passport_status_active",
+      "condition": "passport.status == 'active'",
+      "deny_code": "oap.passport_suspended"
+    },
+    {
+      "name": "transaction_type_allowed",
+      "condition": "context.transaction_type in passport.limits.finance.transaction.allowed_transaction_types",
+      "deny_code": "oap.action_forbidden"
+    },
+    {
+      "name": "asset_class_allowed",
+      "condition": "context.asset_class in passport.limits.finance.transaction.allowed_asset_classes",
+      "deny_code": "oap.asset_class_forbidden"
+    },
+    {
+      "name": "exposure_limit_check",
+      "condition": "context.amount <= passport.limits.finance.transaction.max_exposure_per_tx_usd",
+      "deny_code": "oap.limit_exceeded"
+    },
+    {
+      "name": "account_segregation_check",
+      "condition": "context.source_account_type not in passport.limits.finance.transaction.restricted_source_account_types",
+      "deny_code": "oap.account_type_restricted"
+    },
+    {
+      "name": "account_type_check",
+      "condition": "context.source_account_type in passport.limits.finance.transaction.allowed_source_account_types",
+      "deny_code": "oap.account_type_restricted",
+      "description": "Restricts agent access to specific account classes (e.g., trust, retirement)."
+    },
+    {
+      "name": "segregation_of_funds_check",
+      "condition": "not (context.source_account_type == 'client_funds' and context.destination_account_type == 'proprietary')",
+      "deny_code": "oap.commingling_of_funds_forbidden",
+      "description": "Enforces policies preventing the commingling of client and corporate funds."
+    },
+    {
+      "name": "counterparty_exposure_check",
+      "condition": "daily_counterparty_total[context.counterparty_id] + context.amount <= passport.limits.finance.transaction.max_exposure_per_counterparty_usd",
+      "deny_code": "oap.counterparty_limit_exceeded",
+      "description": "Limits total daily exposure to any single counterparty."
+    },
+    {
+      "name": "idempotency_check",
+      "condition": "context.idempotency_key not in recent_keys",
+      "deny_code": "oap.idempotency_conflict",
+      "description": "Idempotency key must be unique to prevent duplicate transactions."
+    }
+  ]
+}
