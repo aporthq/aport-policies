@@ -913,7 +913,7 @@ describe("Refunds v1 Policy - Integration Tests", () => {
       // For now, we'll just verify the function exists and has the right signature
       const {
         require_refunds_policy,
-      } = require("../middleware/fastapi/src/agent_passport_middleware/middleware_v2");
+      } = require("../middleware/fastapi/src/aporthq_middleware_fastapi/middleware_v2");
 
       expect(typeof require_refunds_policy).toBe("function");
 

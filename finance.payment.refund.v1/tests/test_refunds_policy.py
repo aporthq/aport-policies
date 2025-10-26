@@ -53,9 +53,9 @@ class TestRefundsV1Policy:
 
     def test_required_fields_validation_success(self, valid_context):
         """Test that refund with all required fields is allowed"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=True,
                 decision_id="dec_123",
@@ -69,14 +69,14 @@ class TestRefundsV1Policy:
 
     def test_required_fields_validation_failure(self):
         """Test that refund missing required fields is denied"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         invalid_context = {
             "order_id": "ORD-12345",
             # Missing customer_id, amount_minor, currency, region, reason_code, idempotency_key
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -96,7 +96,7 @@ class TestRefundsV1Policy:
 
     def test_currency_support(self):
         """Test support for multiple currencies"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         currencies = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD"]
         
@@ -111,7 +111,7 @@ class TestRefundsV1Policy:
                 "idempotency_key": f"idempotency_{currency}",
             }
             
-            with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+            with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
                 mock_verify.return_value = MockPolicyResponse(
                     allow=True,
                     decision_id=f"dec_{currency}",
@@ -124,7 +124,7 @@ class TestRefundsV1Policy:
 
     def test_unsupported_currency(self):
         """Test that unsupported currency is denied"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -136,7 +136,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "idempotency_xyz",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -151,7 +151,7 @@ class TestRefundsV1Policy:
 
     def test_amount_precision_validation(self):
         """Test amount precision validation for different currencies"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         test_cases = [
             {"currency": "USD", "amount": 1000, "valid": True},  # $10.00 - valid
@@ -173,7 +173,7 @@ class TestRefundsV1Policy:
                 "idempotency_key": f"idempotency_{test_case['currency']}_{test_case['amount']}",
             }
             
-            with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+            with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
                 if test_case["valid"]:
                     mock_verify.return_value = MockPolicyResponse(allow=True)
                 else:
@@ -190,7 +190,7 @@ class TestRefundsV1Policy:
 
     def test_amount_bounds_validation(self):
         """Test amount bounds validation"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         test_cases = [
             {"amount": 0, "valid": False, "reason": "Amount must be positive"},
@@ -211,7 +211,7 @@ class TestRefundsV1Policy:
                 "idempotency_key": f"idempotency_{test_case['amount']}",
             }
             
-            with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+            with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
                 if test_case["valid"]:
                     mock_verify.return_value = MockPolicyResponse(allow=True)
                 else:
@@ -228,7 +228,7 @@ class TestRefundsV1Policy:
 
     def test_assurance_level_requirements_l2(self):
         """Test L2 requirement for amounts <= $100"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -240,7 +240,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "idempotency_l2",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=True,
                 decision_id="dec_l2_pass",
@@ -253,7 +253,7 @@ class TestRefundsV1Policy:
 
     def test_assurance_level_requirements_l3(self):
         """Test L3 requirement for amounts $100-$500"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -265,7 +265,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "idempotency_l3",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -280,7 +280,7 @@ class TestRefundsV1Policy:
 
     def test_assurance_level_requirements_deny_over_500(self):
         """Test that amounts > $500 are denied in v1"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -292,7 +292,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "idempotency_deny",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -306,7 +306,7 @@ class TestRefundsV1Policy:
 
     def test_idempotency_protection_first_request(self):
         """Test that first request with idempotency key is allowed"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -318,7 +318,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "unique_key_123",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=True,
                 decision_id="dec_first",
@@ -331,7 +331,7 @@ class TestRefundsV1Policy:
 
     def test_idempotency_protection_duplicate(self):
         """Test that duplicate idempotency key is denied"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -343,7 +343,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "duplicate_key_123",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -358,7 +358,7 @@ class TestRefundsV1Policy:
 
     def test_daily_cap_enforcement_within_limit(self):
         """Test that refund within daily cap is allowed"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -370,7 +370,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "daily_cap_test",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=True,
                 decision_id="dec_daily_cap",
@@ -384,7 +384,7 @@ class TestRefundsV1Policy:
 
     def test_daily_cap_enforcement_exceeded(self):
         """Test that refund exceeding daily cap is denied"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -396,7 +396,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "daily_cap_exceeded",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -412,7 +412,7 @@ class TestRefundsV1Policy:
 
     def test_cross_currency_protection(self):
         """Test that cross-currency refunds are denied"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -425,7 +425,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "cross_currency_test",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -440,7 +440,7 @@ class TestRefundsV1Policy:
 
     def test_order_balance_validation_within_balance(self):
         """Test that refund within order balance is allowed"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -454,7 +454,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "balance_valid",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=True,
                 decision_id="dec_balance_valid",
@@ -467,7 +467,7 @@ class TestRefundsV1Policy:
 
     def test_order_balance_validation_exceeded(self):
         """Test that refund exceeding order balance is denied"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -481,7 +481,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "balance_exceeded",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -496,7 +496,7 @@ class TestRefundsV1Policy:
 
     def test_region_validation_allowed(self):
         """Test that refund in allowed region is permitted"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -508,7 +508,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "region_valid",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=True,
                 decision_id="dec_region_valid",
@@ -521,7 +521,7 @@ class TestRefundsV1Policy:
 
     def test_region_validation_denied(self):
         """Test that refund in disallowed region is denied"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -533,7 +533,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "region_invalid",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -548,7 +548,7 @@ class TestRefundsV1Policy:
 
     def test_reason_code_validation_valid(self):
         """Test that valid reason codes are allowed"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         valid_reason_codes = ["customer_request", "defective", "not_as_described", "duplicate", "fraud"]
         
@@ -563,7 +563,7 @@ class TestRefundsV1Policy:
                 "idempotency_key": f"reason_{reason_code}",
             }
             
-            with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+            with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
                 mock_verify.return_value = MockPolicyResponse(
                     allow=True,
                     decision_id=f"dec_{reason_code}",
@@ -576,7 +576,7 @@ class TestRefundsV1Policy:
 
     def test_reason_code_validation_invalid(self):
         """Test that invalid reason codes are denied"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -588,7 +588,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "invalid_reason_test",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -603,9 +603,9 @@ class TestRefundsV1Policy:
 
     def test_error_handling_policy_verification_failure(self):
         """Test handling of policy verification failures"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = None  # Simulate verification failure
             
             result = check_policy_sync("agent_123", "finance.payment.refund.v1", {})
@@ -615,9 +615,9 @@ class TestRefundsV1Policy:
 
     def test_error_handling_network_error(self):
         """Test handling of network errors"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.side_effect = Exception("Network error")
             
             result = check_policy_sync("agent_123", "finance.payment.refund.v1", {})
@@ -627,7 +627,7 @@ class TestRefundsV1Policy:
 
     def test_edge_cases_extreme_amounts(self):
         """Test prevention of extremely large amounts"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -639,7 +639,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "extreme_amount",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -653,7 +653,7 @@ class TestRefundsV1Policy:
 
     def test_edge_cases_negative_amounts(self):
         """Test prevention of negative amounts"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -665,7 +665,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "negative_amount",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -679,7 +679,7 @@ class TestRefundsV1Policy:
 
     def test_edge_cases_zero_amounts(self):
         """Test prevention of zero amounts"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         context = {
             "order_id": "ORD-12345",
@@ -691,7 +691,7 @@ class TestRefundsV1Policy:
             "idempotency_key": "zero_amount",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=False,
                 reasons=[
@@ -705,7 +705,7 @@ class TestRefundsV1Policy:
 
     def test_idempotency_key_format_validation(self):
         """Test validation of idempotency key format"""
-        from agent_passport.policy_enforcement import check_policy_sync
+        from aporthq_sdk_python.policy_enforcement import check_policy_sync
         
         invalid_keys = ["", "a", "a" * 100, "invalid@key", "key with spaces"]
         
@@ -720,7 +720,7 @@ class TestRefundsV1Policy:
                 "idempotency_key": key,
             }
             
-            with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+            with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
                 mock_verify.return_value = MockPolicyResponse(
                     allow=False,
                     reasons=[
@@ -738,7 +738,7 @@ class TestRefundsV1PolicyIntegration:
 
     def test_fastapi_middleware_integration(self):
         """Test FastAPI middleware integration"""
-        from agent_passport_middleware.middleware_v2 import require_refunds_policy
+        from aporthq_middleware_fastapi.middleware_v2 import require_refunds_policy
         
         # Test that the function exists and has the right signature
         assert callable(require_refunds_policy)
@@ -749,7 +749,7 @@ class TestRefundsV1PolicyIntegration:
     @pytest.mark.asyncio
     async def test_async_policy_compliance(self):
         """Test async policy compliance checking"""
-        from agent_passport.policy_enforcement import check_policy_compliance
+        from aporthq_sdk_python.policy_enforcement import check_policy_compliance
         
         context = {
             "order_id": "ORD-12345",
@@ -761,7 +761,7 @@ class TestRefundsV1PolicyIntegration:
             "idempotency_key": "async_test",
         }
         
-        with patch('agent_passport.policy_enforcement.verify_policy_compliance') as mock_verify:
+        with patch('aporthq_sdk_python.policy_enforcement.verify_policy_compliance') as mock_verify:
             mock_verify.return_value = MockPolicyResponse(
                 allow=True,
                 decision_id="dec_async",
