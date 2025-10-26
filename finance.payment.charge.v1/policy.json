@@ -88,7 +88,7 @@
         "description": "Array of items being purchased",
         "items": {
           "type": "object",
-          "required": ["sku", "qty"],
+          "required": ["sku", "qty", "price"],
           "properties": {
             "sku": {
               "type": "string",
@@ -98,6 +98,16 @@
               "type": "integer",
               "minimum": 1,
               "description": "Quantity"
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Item name for audit and compliance"
+            },
+            "price": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Price in minor currency units (e.g., cents)"
             },
             "category": {
               "type": "string",
