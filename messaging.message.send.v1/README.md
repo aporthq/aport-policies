@@ -148,3 +148,83 @@ async def send_message(request: Request, message_data: MessageRequest):
 - **Notifications**: System alerts across multiple channels
 - **Community Management**: Moderated Discord/Slack interactions
 - **Internal Tools**: Employee messaging and announcements
+
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "channel_id",
+    "message",
+    "message_type"
+  ],
+  "properties": {
+    "channel_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target channel identifier"
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "description": "Message content"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "embed",
+        "file",
+        "reaction"
+      ],
+      "description": "Type of message"
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User or role mentions in the message"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          }
+        }
+      },
+      "description": "File attachments"
+    },
+    "thread_id": {
+      "type": "string",
+      "description": "Thread identifier for threaded messages"
+    },
+    "reply_to": {
+      "type": "string",
+      "description": "Message ID being replied to"
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/messaging.message.send.v1?format=schema"
+```
+

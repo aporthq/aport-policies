@@ -1,7 +1,7 @@
 {
   "id": "governance.data.access.v1",
   "name": "Data Access Governance Policy",
-  "description": "Pre-act governance for agent-initiated data access. Enforces controls based on data classification, sensitivity, entity access rights, and jurisdictional boundaries.",
+  "description": "Pre-action governance for agent-initiated data access. Enforces controls based on data classification, sensitivity, entity access rights, and jurisdictional boundaries.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["data.access"],

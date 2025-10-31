@@ -1,7 +1,7 @@
 {
   "id": "code.release.publish.v1",
   "name": "Release Policy",
-  "description": "Pre-act governance for release operations. Enforces version format, file restrictions, and repository permissions.",
+  "description": "Pre-action governance for release operations. Enforces version format, file restrictions, and repository permissions.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["release"],

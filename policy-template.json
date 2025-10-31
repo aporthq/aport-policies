@@ -1,7 +1,7 @@
 {
   "id": "policy.{operation}.v1",
   "name": "{Operation} Policy",
-  "description": "Pre-act governance for {operation} operations. {Brief description of what this policy protects and enforces}.",
+  "description": "Pre-action governance for {operation} operations. {Brief description of what this policy protects and enforces}.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["{capability.name}"],

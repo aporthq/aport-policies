@@ -1,7 +1,7 @@
 {
   "id": "data.report.ingest.v1",
   "name": "Report Data Ingestion Policy",
-  "description": "Pre-act governance for data being ingested by an AI agent for reporting purposes (e.g., ESG, financial disclosures). Enforces rules on data source credibility and freshness.",
+  "description": "Pre-action governance for data being ingested by an AI agent for reporting purposes (e.g., ESG, financial disclosures). Enforces rules on data source credibility and freshness.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["data.report.ingest"],

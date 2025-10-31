@@ -1,7 +1,7 @@
 {
   "id": "finance.transaction.execute.v1",
   "name": "Financial Transaction Execution Policy",
-  "description": "Pre-act governance for agent-initiated financial transactions like trades or transfers. Enforces rules on asset classes, exposure limits, and account types.",
+  "description": "Pre-action governance for agent-initiated financial transactions like trades or transfers. Enforces rules on asset classes, exposure limits, and account types.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["finance.transaction"],

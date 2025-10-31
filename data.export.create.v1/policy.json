@@ -1,7 +1,7 @@
 {
   "id": "data.export.create.v1",
   "name": "Data Export Protection Policy",
-  "description": "Pre-act governance for data export operations. Enforces row limits, PII handling requirements, and export capability validation.",
+  "description": "Pre-action governance for data export operations. Enforces row limits, PII handling requirements, and export capability validation.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["data.export"],

@@ -207,3 +207,86 @@ Agents that meet this policy's requirements can display the "Data-Access-Ready" 
 
 ---
 **Last Updated**: 2025-01-30 00:00:00 UTC
+
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "data_classification",
+    "accessing_entity_id",
+    "accessing_entity_type",
+    "resource_id"
+  ],
+  "properties": {
+    "data_classification": {
+      "type": "string",
+      "description": "The classification of the data being accessed (e.g., 'PII', 'Financial', 'HR', 'ClientTier1')."
+    },
+    "accessing_entity_id": {
+      "type": "string",
+      "description": "The unique ID of the entity (user, agent, employee) attempting the access."
+    },
+    "accessing_entity_type": {
+      "type": "string",
+      "enum": [
+        "employee",
+        "client",
+        "system_agent"
+      ],
+      "description": "The type of entity attempting the access."
+    },
+    "resource_id": {
+      "type": "string",
+      "description": "The unique ID of the data resource being accessed (e.g., account number, user profile ID)."
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "read",
+        "export",
+        "delete",
+        "update"
+      ],
+      "default": "read",
+      "description": "The type of data access action being performed."
+    },
+    "jurisdiction": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "The ISO 3166-1 alpha-2 country code relevant to the data's jurisdiction."
+    },
+    "row_count": {
+      "type": "integer",
+      "description": "The number of rows/records being accessed or exported. Solves for Row Limits."
+    },
+    "destination_jurisdiction": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "The destination country code for data transfers. Solves for Data Locality."
+    },
+    "resource_attributes": {
+      "type": "object",
+      "description": "A flexible object for passing specific attributes of the resource being accessed. Solves for Balance Inquiry.",
+      "properties": {
+        "account_balance_usd": {
+          "type": "integer",
+          "description": "The balance of the account in USD minor units, used for balance-based access rules."
+        }
+      }
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/governance.data.access.v1?format=schema"
+```
+

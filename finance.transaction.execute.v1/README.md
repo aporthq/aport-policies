@@ -231,3 +231,79 @@ Agents that meet this policy's requirements can display the "Transaction-Ready" 
 
 ---
 **Last Updated**: 2025-01-30 00:00:00 UTC
+
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "transaction_type",
+    "amount",
+    "currency",
+    "asset_class",
+    "source_account_id",
+    "destination_account_id"
+  ],
+  "properties": {
+    "transaction_type": {
+      "type": "string",
+      "enum": [
+        "buy",
+        "sell",
+        "transfer",
+        "short_sell"
+      ],
+      "description": "The type of financial transaction being executed."
+    },
+    "amount": {
+      "type": "integer",
+      "description": "Transaction amount in minor units (e.g., cents)."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 currency code."
+    },
+    "asset_class": {
+      "type": "string",
+      "description": "The class of the asset being transacted (e.g., 'equity', 'bond', 'crypto', 'cash')."
+    },
+    "source_account_id": {
+      "type": "string",
+      "description": "The ID of the account from which funds/assets are being moved."
+    },
+    "source_account_type": {
+      "type": "string",
+      "description": "The type of the source account (e.g., 'client_funds', 'trust_funds', 'proprietary')."
+    },
+    "destination_account_id": {
+      "type": "string",
+      "description": "The ID of the destination account."
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Idempotency key to prevent duplicate transactions."
+    },
+    "destination_account_type": {
+      "type": "string",
+      "description": "The type of the destination account (e.g., 'client_funds', 'proprietary'). Solves for Segregation of Funds."
+    },
+    "counterparty_id": {
+      "type": "string",
+      "description": "A unique identifier for the counterparty in a trade. Solves for Counterparty Exposure."
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/finance.transaction.execute.v1?format=schema"
+```
+

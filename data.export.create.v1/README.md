@@ -133,3 +133,94 @@ Agents that meet this policy's requirements can display the "Data Export-Ready" 
 - [Documentation](https://aport.io/docs/policies/data.export.create.v1)
 - [Community](https://github.com/aporthq/community)
 - [Support](https://aport.io/support)
+
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "export_type",
+    "format",
+    "filters"
+  ],
+  "properties": {
+    "export_type": {
+      "type": "string",
+      "enum": [
+        "users",
+        "orders",
+        "transactions",
+        "analytics"
+      ],
+      "description": "Type of data to export"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "csv",
+        "json",
+        "xlsx",
+        "parquet"
+      ],
+      "description": "Export format"
+    },
+    "filters": {
+      "type": "object",
+      "description": "Filter criteria for the export",
+      "properties": {
+        "date_from": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date"
+        },
+        "status": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        }
+      }
+    },
+    "include_pii": {
+      "type": "boolean",
+      "description": "Whether to include personally identifiable information"
+    },
+    "date_range": {
+      "type": "object",
+      "description": "Date range for the export",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date"
+        },
+        "end": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Specific columns to include"
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/data.export.create.v1?format=schema"
+```
+

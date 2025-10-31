@@ -1,7 +1,7 @@
 {
   "id": "finance.payment.payout.v1",
   "name": "Payment Payout Policy",
-  "description": "Pre-act governance for payment payout operations. Enforces per-currency caps, destination restrictions, and compliance requirements.",
+  "description": "Pre-action governance for payment payout operations. Enforces per-currency caps, destination restrictions, and compliance requirements.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["payments.payout"],

@@ -1,7 +1,7 @@
 {
   "id": "messaging.message.send.v1",
   "name": "Messaging Protection Policy",
-  "description": "Pre-act governance for messaging operations. Enforces rate limits, channel restrictions, mention policies, and content validation for PLG on-ramp.",
+  "description": "Pre-action governance for messaging operations. Enforces rate limits, channel restrictions, mention policies, and content validation for PLG on-ramp.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["messaging.send"],

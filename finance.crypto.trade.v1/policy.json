@@ -1,7 +1,7 @@
 {
   "id": "finance.crypto.trade.v1",
   "name": "Crypto Asset Trading Policy",
-  "description": "Pre-act governance for agent-initiated crypto asset trades. Enforces rules on specific tokens, exchanges, wallet types, and transaction value.",
+  "description": "Pre-action governance for agent-initiated crypto asset trades. Enforces rules on specific tokens, exchanges, wallet types, and transaction value.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["finance.crypto.trade"],

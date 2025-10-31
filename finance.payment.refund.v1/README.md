@@ -187,3 +187,89 @@ Agents that meet this policy's requirements can display the "Refunds-Ready" badg
 
 ---
 **Last Updated**: 2025-09-24 23:15:00 UTC
+
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "order_id",
+    "customer_id",
+    "amount",
+    "currency",
+    "region",
+    "reason_code",
+    "idempotency_key"
+  ],
+  "properties": {
+    "order_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Original order identifier"
+    },
+    "customer_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Customer identifier"
+    },
+    "amount": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Refund amount in minor units (e.g., cents)"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 currency code"
+    },
+    "region": {
+      "type": "string",
+      "description": "Geographic region"
+    },
+    "reason_code": {
+      "type": "string",
+      "description": "Refund reason code"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 8,
+      "description": "Idempotency key for duplicate prevention"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional refund note"
+    },
+    "merchant_case_id": {
+      "type": "string",
+      "description": "Merchant's internal case ID"
+    },
+    "order_currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "Original order currency"
+    },
+    "order_total_minor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Original order total in minor units"
+    },
+    "already_refunded_minor": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Amount already refunded in minor units"
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/finance.payment.refund.v1?format=schema"
+```
+

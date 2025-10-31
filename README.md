@@ -55,7 +55,7 @@ All policy packs follow the [OAP v1.0 specification](https://github.com/aporthq/
 {
   "id": "finance.payment.charge.v1",
   "name": "Payment Charge Policy", 
-  "description": "Pre-act governance for agent-initiated payments...",
+  "description": "Pre-action governance for agent-initiated payments...",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["payments.charge"],
