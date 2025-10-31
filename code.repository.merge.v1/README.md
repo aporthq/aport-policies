@@ -208,3 +208,80 @@ async function createPullRequest({ repo, base_branch, head_branch, title, files_
 - **Bug Fixes**: AI-generated bug fixes with human review
 - **Feature Development**: Controlled AI feature development with governance
 
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "repository",
+    "action",
+    "branch"
+  ],
+  "properties": {
+    "repository": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$",
+      "description": "Repository in owner/repo format"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "pr.create",
+        "pr.merge",
+        "pr.update",
+        "branch.create",
+        "branch.delete"
+      ],
+      "description": "Repository action being performed"
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target branch name"
+    },
+    "base_branch": {
+      "type": "string",
+      "description": "Base branch for PR operations"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "PR or commit title"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 5000,
+      "description": "PR or commit description"
+    },
+    "files_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of files being changed"
+    },
+    "lines_added": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of lines added"
+    },
+    "lines_removed": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of lines removed"
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/code.repository.merge.v1?format=schema"
+```
+

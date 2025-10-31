@@ -224,3 +224,103 @@ Agents that meet this policy's requirements can display the "Charge-Ready" badge
 
 ---
 **Last Updated**: 2025-09-30 00:00:00 UTC
+
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "amount",
+    "currency",
+    "merchant_id",
+    "region",
+    "items",
+    "idempotency_key"
+  ],
+  "properties": {
+    "amount": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Minor units (e.g., cents)"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 currency code"
+    },
+    "merchant_id": {
+      "type": "string",
+      "description": "Merchant identifier"
+    },
+    "region": {
+      "type": "string",
+      "description": "Geographic region"
+    },
+    "shipping_country": {
+      "type": "string",
+      "description": "Shipping country code"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Array of items being purchased",
+      "items": {
+        "type": "object",
+        "required": [
+          "sku",
+          "qty",
+          "price"
+        ],
+        "properties": {
+          "sku": {
+            "type": "string",
+            "description": "Stock keeping unit"
+          },
+          "qty": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Quantity"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Item name for audit and compliance"
+          },
+          "price": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Price in minor currency units (e.g., cents)"
+          },
+          "category": {
+            "type": "string",
+            "description": "Item category"
+          }
+        }
+      }
+    },
+    "risk_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Risk score (0-100)"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 8,
+      "description": "Idempotency key for duplicate prevention"
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/finance.payment.charge.v1?format=schema"
+```
+

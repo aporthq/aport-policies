@@ -1,7 +1,7 @@
 {
   "id": "code.repository.merge.v1",
   "name": "Repository Safety Policy",
-  "description": "Pre-act governance for repository operations. Enforces PR limits, merge controls, path restrictions, and review requirements for dev-first safety.",
+  "description": "Pre-action governance for repository operations. Enforces PR limits, merge controls, path restrictions, and review requirements for dev-first safety.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["repo.pr.create", "repo.merge"],

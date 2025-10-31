@@ -89,3 +89,46 @@ fetch('/data/report/ingest', {
 
 ---
 **Last Updated**: 2025-01-30 00:00:00 UTC
+
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "report_type",
+    "data_source_id",
+    "data_timestamp"
+  ],
+  "properties": {
+    "report_type": {
+      "type": "string",
+      "description": "The type of report being generated (e.g., 'ESG', 'QuarterlyFinancials')."
+    },
+    "data_source_id": {
+      "type": "string",
+      "description": "A unique identifier for the source of the data being ingested (e.g., 'api.climate-data.com', 'internal-hr-db')."
+    },
+    "data_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The ISO 8601 timestamp of when the data was generated."
+    },
+    "metric_type": {
+      "type": "string",
+      "description": "The specific metric this data point relates to (e.g., 'carbon_emissions', 'employee_diversity')."
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/data.report.ingest.v1?format=schema"
+```
+

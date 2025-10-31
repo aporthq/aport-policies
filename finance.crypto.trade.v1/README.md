@@ -87,3 +87,60 @@ fetch('/finance/crypto/trade', {
 
 ---
 **Last Updated**: 2025-01-30 00:00:00 UTC
+
+
+## Required Context
+
+This policy requires the following context (JSON Schema):
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "exchange_id",
+    "pair",
+    "side",
+    "amount_usd"
+  ],
+  "properties": {
+    "exchange_id": {
+      "type": "string",
+      "description": "The exchange where the trade is being executed (e.g., 'coinbase', 'binance')."
+    },
+    "pair": {
+      "type": "string",
+      "pattern": "^[A-Z]+-[A-Z]+$",
+      "description": "The trading pair (e.g., 'BTC-USD')."
+    },
+    "side": {
+      "type": "string",
+      "enum": [
+        "buy",
+        "sell"
+      ],
+      "description": "The side of the trade."
+    },
+    "amount_usd": {
+      "type": "integer",
+      "description": "The total value of the trade in USD minor units (cents)."
+    },
+    "source_wallet_type": {
+      "type": "string",
+      "enum": [
+        "hot",
+        "cold",
+        "custodial"
+      ],
+      "description": "The type of wallet initiating the trade."
+    }
+  }
+}
+```
+
+You can also fetch this live via the discovery endpoint:
+
+```bash
+curl -s "https://aport.io/api/policies/finance.crypto.trade.v1?format=schema"
+```
+

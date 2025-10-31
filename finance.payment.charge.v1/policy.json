@@ -1,7 +1,7 @@
 {
   "id": "finance.payment.charge.v1",
   "name": "Payment Charge Policy",
-  "description": "Pre-act governance for agent-initiated payments. Enforces per-currency caps, merchant/region allowlists, category blocks, assurance minimums, and idempotency.",
+  "description": "Pre-action governance for agent-initiated payments. Enforces per-currency caps, merchant/region allowlists, category blocks, assurance minimums, and idempotency.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["payments.charge"],
