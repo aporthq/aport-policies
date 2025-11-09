@@ -66,6 +66,28 @@
         "type": "array",
         "items": { "type": "string" },
         "description": "Specific columns to include"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers being used in this request (e.g., [\"https://mcp.notion.com\"])"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools being used in this request (e.g., [\"notion.pages.export\"])"
+      },
+      "mcp_server": {
+        "type": "string",
+        "description": "Single MCP server being used (backward compatibility - use mcp_servers array for multiple)"
+      },
+      "mcp_tool": {
+        "type": "string",
+        "description": "Single MCP tool being used (backward compatibility - use mcp_tools array for multiple)"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail (optional)"
       }
     }
   },
