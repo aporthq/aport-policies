@@ -111,6 +111,28 @@
             "description": "The balance of the account in USD minor units, used for balance-based access rules."
           }
         }
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers being used in this request (e.g., [\"https://mcp.snowflake.com\"])"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools being used in this request (e.g., [\"snowflake.query.execute\"])"
+      },
+      "mcp_server": {
+        "type": "string",
+        "description": "Single MCP server being used (backward compatibility - use mcp_servers array for multiple)"
+      },
+      "mcp_tool": {
+        "type": "string",
+        "description": "Single MCP tool being used (backward compatibility - use mcp_tools array for multiple)"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail (optional)"
       }
     }
   },
