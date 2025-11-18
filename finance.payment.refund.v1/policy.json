@@ -1,7 +1,7 @@
 {
   "id": "finance.payment.refund.v1",
   "name": "Refunds Protection Policy",
-  "description": "Post-act governance for refund operations. Enforces per-currency caps, reason code validation, cross-currency restrictions, and idempotency.",
+  "description": "Pre-act governance for refund operations. Enforces per-currency caps, reason code validation, cross-currency restrictions, and idempotency.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["finance.payment.refund"],
