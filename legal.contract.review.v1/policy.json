@@ -1,0 +1,378 @@
+{
+  "id": "legal.contract.review.v1",
+  "name": "Legal Contract Review Policy",
+  "description": "Pre-action governance for legal contract review, drafting, and redlining operations. Enforces firm-specific guardrails, privilege protection, attorney supervision requirements, and jurisdiction controls to prevent malpractice risk and ensure ABA ethics compliance.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["legal.contract.review"],
+  "min_assurance": "L3",
+  "limits_required": [
+    "allowed_document_types",
+    "max_document_size_mb",
+    "allowed_contract_jurisdictions",
+    "require_attorney_review",
+    "privilege_protection_enabled",
+    "max_contracts_per_day",
+    "allowed_client_tiers",
+    "supported_currencies",
+    "currency_limits",
+    "require_client_consent",
+    "require_conflicts_check",
+    "require_fee_disclosure",
+    "allowed_attorney_jurisdictions",
+    "require_matter_isolation"
+  ],
+  "required_fields": [
+    "document_type",
+    "client_id",
+    "jurisdiction",
+    "action_type",
+    "idempotency_key"
+  ],
+  "optional_fields": [
+    "document_size_mb",
+    "client_tier",
+    "attorney_reviewer_id",
+    "privilege_level",
+    "contract_value",
+    "contract_currency",
+    "matter_id",
+    "review_deadline",
+    "client_consent_given",
+    "conflicts_check_passed",
+    "fee_disclosure_provided",
+    "engagement_letter_signed",
+    "opposing_party_id",
+    "data_encrypted",
+    "supervisor_approval_id"
+  ],
+  "enforcement": {
+    "document_type_allowed": true,
+    "document_size_limit": true,
+    "jurisdiction_authorized": true,
+    "attorney_review_required": true,
+    "privilege_protection_enforced": true,
+    "daily_contract_limit": true,
+    "client_tier_authorized": true,
+    "assurance_tier_enforced": true,
+    "idempotency_required": true,
+    "currency_supported": true,
+    "per_currency_value_limit": true,
+    "daily_currency_cap": true,
+    "client_consent_required": true,
+    "conflicts_check_required": true,
+    "fee_disclosure_required": true,
+    "engagement_letter_required": true,
+    "attorney_jurisdiction_authorized": true,
+    "matter_isolation_required": true,
+    "data_encryption_required": true,
+    "supervisor_approval_required": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Cache /verify with ETag; 60s TTL",
+    "Subscribe to status webhooks for instant suspend",
+    "Log all contract review attempts for Verifiable Attestation",
+    "Maintain immutable audit trails for malpractice protection",
+    "Enforce attorney supervision per ABA Formal Opinion 512",
+    "Protect attorney-client privilege in all operations",
+    "Implement document type allowlists for firm-specific guardrails",
+    "Monitor contract review patterns for unusual activity",
+    "Use idempotency keys to prevent duplicate operations",
+    "Track jurisdiction compliance for multi-jurisdictional practice",
+    "Maintain privilege level metadata for all documents",
+    "Require attorney review for high-value contracts based on currency-specific thresholds",
+    "Obtain client consent for AI use per ABA ethics rules",
+    "Perform conflicts of interest checks per ABA Rule 1.7",
+    "Disclose fee reductions from AI use per ABA ethics rules",
+    "Require engagement letters for new client matters",
+    "Verify attorney licensing in contract jurisdiction to prevent UPL violations",
+    "Enforce matter isolation to prevent conflicts with opposing parties",
+    "Encrypt client data per ABA Rule 1.6 confidentiality requirements",
+    "Require supervisor approval for non-lawyer work per ABA Rule 5.3",
+    "Configure per-currency contract value limits for multi-currency operations",
+    "Set document retention policies (typically 7-10 years) for compliance"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": [
+      "document_type",
+      "client_id",
+      "jurisdiction",
+      "action_type",
+      "idempotency_key"
+    ],
+    "properties": {
+      "document_type": {
+        "type": "string",
+        "enum": [
+          "contract",
+          "nda",
+          "msa",
+          "sla",
+          "employment_agreement",
+          "purchase_agreement",
+          "lease",
+          "license_agreement",
+          "settlement_agreement",
+          "other"
+        ],
+        "description": "Type of legal document being reviewed"
+      },
+      "client_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Unique identifier for the client"
+      },
+      "jurisdiction": {
+        "type": "string",
+        "pattern": "^[A-Z]{2}$",
+        "description": "ISO 3166-1 alpha-2 country code for contract jurisdiction"
+      },
+      "action_type": {
+        "type": "string",
+        "enum": ["review", "draft", "redline", "approve"],
+        "description": "Type of action being performed on the contract"
+      },
+      "idempotency_key": {
+        "type": "string",
+        "minLength": 8,
+        "description": "Idempotency key for duplicate prevention"
+      },
+      "document_size_mb": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "description": "Size of the document in megabytes"
+      },
+      "client_tier": {
+        "type": "string",
+        "enum": ["tier1", "tier2", "tier3", "enterprise", "public"],
+        "description": "Client tier classification"
+      },
+      "attorney_reviewer_id": {
+        "type": "string",
+        "description": "ID of the attorney supervising this review (required if require_attorney_review is true)"
+      },
+      "privilege_level": {
+        "type": "string",
+        "enum": ["public", "confidential", "privileged", "highly_confidential"],
+        "description": "Attorney-client privilege level of the document"
+      },
+      "contract_value": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Contract value in minor units (cents, yen, etc.)"
+      },
+      "contract_currency": {
+        "type": "string",
+        "pattern": "^[A-Z]{3}$",
+        "description": "ISO 4217 currency code for contract value"
+      },
+      "matter_id": {
+        "type": "string",
+        "description": "Legal matter identifier"
+      },
+      "review_deadline": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Deadline for contract review completion"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers being used in this request (e.g., [\"https://mcp.clio.com\"])"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools being used in this request (e.g., [\"clio.contracts.review\"])"
+      },
+      "mcp_server": {
+        "type": "string",
+        "description": "Single MCP server being used (backward compatibility - use mcp_servers array for multiple)"
+      },
+      "mcp_tool": {
+        "type": "string",
+        "description": "Single MCP tool being used (backward compatibility - use mcp_tools array for multiple)"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail (optional)"
+      },
+      "client_consent_given": {
+        "type": "boolean",
+        "description": "Whether client has consented to AI use (required if require_client_consent is true)"
+      },
+      "conflicts_check_passed": {
+        "type": "boolean",
+        "description": "Whether conflicts of interest check has passed (required if require_conflicts_check is true)"
+      },
+      "fee_disclosure_provided": {
+        "type": "boolean",
+        "description": "Whether fee disclosure has been provided to client (required if require_fee_disclosure is true)"
+      },
+      "engagement_letter_signed": {
+        "type": "boolean",
+        "description": "Whether engagement letter has been signed (required if require_engagement_letter is true)"
+      },
+      "opposing_party_id": {
+        "type": "string",
+        "description": "ID of opposing party in the matter (for conflicts checking)"
+      },
+      "data_encrypted": {
+        "type": "boolean",
+        "description": "Whether client data is encrypted (required if require_data_encryption is true)"
+      },
+      "supervisor_approval_id": {
+        "type": "string",
+        "description": "ID of supervisor who approved this operation (required if require_supervisor_approval is true)"
+      }
+    }
+  },
+  "evaluation_rules": [
+    {
+      "name": "passport_status_active",
+      "condition": "passport.status == 'active'",
+      "deny_code": "oap.passport_suspended",
+      "description": "Passport must be active"
+    },
+    {
+      "name": "assurance_minimum",
+      "condition": "passport.assurance_level >= policy.min_assurance",
+      "deny_code": "oap.assurance_insufficient",
+      "description": "Assurance level must meet minimum requirement (L3) for legal operations"
+    },
+    {
+      "name": "document_type_allowed",
+      "condition": "context.document_type in passport.limits.legal.contract.review.allowed_document_types",
+      "deny_code": "oap.document_type_forbidden",
+      "description": "Document type must be in allowed list"
+    },
+    {
+      "name": "document_size_limit",
+      "condition": "NOT context.document_size_mb OR context.document_size_mb <= passport.limits.legal.contract.review.max_document_size_mb",
+      "deny_code": "oap.document_size_exceeded",
+      "description": "Document size must not exceed maximum allowed size"
+    },
+    {
+      "name": "jurisdiction_authorized",
+      "condition": "context.jurisdiction in passport.limits.legal.contract.review.allowed_contract_jurisdictions",
+      "deny_code": "oap.jurisdiction_blocked",
+      "description": "Jurisdiction must be authorized for contract review"
+    },
+    {
+      "name": "attorney_review_required",
+      "condition": "NOT passport.limits.legal.contract.review.require_attorney_review OR context.attorney_reviewer_id",
+      "deny_code": "oap.attorney_review_required",
+      "description": "Attorney review must be provided if required by firm policy"
+    },
+    {
+      "name": "privilege_protection_enforced",
+      "condition": "passport.limits.legal.contract.review.privilege_protection_enabled == false OR context.privilege_level",
+      "deny_code": "oap.privilege_protection_violation",
+      "description": "Privilege protection must be enabled and privilege level must be specified"
+    },
+    {
+      "name": "daily_contract_limit",
+      "condition": "daily_contract_count < passport.limits.legal.contract.review.max_contracts_per_day",
+      "deny_code": "oap.daily_limit_exceeded",
+      "description": "Daily contract review limit must not be exceeded"
+    },
+    {
+      "name": "client_tier_authorized",
+      "condition": "NOT context.client_tier OR context.client_tier in passport.limits.legal.contract.review.allowed_client_tiers",
+      "deny_code": "oap.client_tier_forbidden",
+      "description": "Client tier must be authorized for contract review"
+    },
+    {
+      "name": "idempotency_check",
+      "condition": "idempotency_key not in recent_keys",
+      "deny_code": "oap.idempotency_conflict",
+      "description": "Idempotency key must be unique"
+    },
+    {
+      "name": "currency_supported",
+      "condition": "NOT context.contract_currency OR context.contract_currency in passport.limits.legal.contract.review.supported_currencies",
+      "deny_code": "oap.currency_unsupported",
+      "description": "Contract currency must be supported"
+    },
+    {
+      "name": "per_currency_value_limit",
+      "condition": "NOT context.contract_value OR NOT context.contract_currency OR context.contract_value <= passport.limits.legal.contract.review.currency_limits[context.contract_currency].max_per_contract",
+      "deny_code": "oap.limit_exceeded",
+      "description": "Contract value must not exceed per-currency limit"
+    },
+    {
+      "name": "daily_currency_cap",
+      "condition": "daily_contract_value[context.contract_currency] + context.contract_value <= passport.limits.legal.contract.review.currency_limits[context.contract_currency].daily_cap",
+      "deny_code": "oap.daily_limit_exceeded",
+      "description": "Daily contract value cap per currency must not be exceeded"
+    },
+    {
+      "name": "high_value_contract_review",
+      "condition": "NOT context.contract_value OR NOT context.contract_currency OR context.contract_value < passport.limits.legal.contract.review.currency_limits[context.contract_currency].require_attorney_review_threshold OR context.attorney_reviewer_id",
+      "deny_code": "oap.high_value_review_required",
+      "description": "High-value contracts require attorney review based on currency-specific threshold"
+    },
+    {
+      "name": "client_consent_required",
+      "condition": "NOT passport.limits.legal.contract.review.require_client_consent OR context.client_consent_given",
+      "deny_code": "oap.client_consent_required",
+      "description": "Client consent for AI use is required per ABA ethics rules"
+    },
+    {
+      "name": "conflicts_check_required",
+      "condition": "NOT passport.limits.legal.contract.review.require_conflicts_check OR context.conflicts_check_passed",
+      "deny_code": "oap.conflicts_check_required",
+      "description": "Conflicts of interest check is required per ABA Rule 1.7"
+    },
+    {
+      "name": "fee_disclosure_required",
+      "condition": "NOT passport.limits.legal.contract.review.require_fee_disclosure OR context.fee_disclosure_provided",
+      "deny_code": "oap.fee_disclosure_required",
+      "description": "Fee disclosure is required if AI reduces costs per ABA ethics rules"
+    },
+    {
+      "name": "engagement_letter_required",
+      "condition": "NOT passport.limits.legal.contract.review.require_engagement_letter OR context.engagement_letter_signed",
+      "deny_code": "oap.engagement_letter_required",
+      "description": "Engagement letter is required for new client matters per ABA ethics rules"
+    },
+    {
+      "name": "attorney_jurisdiction_authorized",
+      "condition": "NOT context.jurisdiction OR context.jurisdiction in passport.limits.legal.contract.review.allowed_attorney_jurisdictions",
+      "deny_code": "oap.unauthorized_practice_of_law",
+      "description": "Attorney must be licensed in the contract jurisdiction to prevent UPL violations"
+    },
+    {
+      "name": "matter_isolation_required",
+      "condition": "NOT passport.limits.legal.contract.review.require_matter_isolation OR NOT context.opposing_party_id OR context.opposing_party_id NOT IN recent_clients[context.matter_id]",
+      "deny_code": "oap.conflict_of_interest",
+      "description": "Cannot review contracts for opposing parties in the same matter per ABA Rule 1.7"
+    },
+    {
+      "name": "data_encryption_required",
+      "condition": "NOT passport.limits.legal.contract.review.require_data_encryption OR context.data_encrypted",
+      "deny_code": "oap.data_encryption_required",
+      "description": "Client data encryption is required for confidentiality per ABA Rule 1.6"
+    },
+    {
+      "name": "supervisor_approval_required",
+      "condition": "NOT passport.limits.legal.contract.review.require_supervisor_approval OR context.supervisor_approval_id",
+      "deny_code": "oap.supervisor_approval_required",
+      "description": "Supervisor approval is required for non-lawyer work per ABA Rule 5.3"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2025-01-30T00:00:00Z",
+  "updated_at": "2025-01-30T00:00:00Z"
+}
+

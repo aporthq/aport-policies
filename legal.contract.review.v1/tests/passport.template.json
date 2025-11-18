@@ -1,0 +1,49 @@
+{
+  "agent_id": "ap_legal_contract_review_template",
+  "slug": "legal-contract-review-template",
+  "name": "Legal Contract Review Template",
+  "kind": "template",
+  "spec_version": "oap/1.0",
+  "owner_id": "org_law_firm_demo",
+  "owner_type": "org",
+  "owner_display": "Demo Law Firm",
+  "controller_type": "org",
+  "claimed": true,
+  "assurance_level": "L3",
+  "status": "active",
+  "capabilities": [
+    {
+      "id": "legal.contract.review",
+      "params": {}
+    }
+  ],
+  "limits": {
+    "legal": {
+      "contract": {
+        "review": {
+          "allowed_document_types": [
+            "contract",
+            "nda",
+            "msa",
+            "sla",
+            "employment_agreement"
+          ],
+          "max_document_size_mb": 10,
+          "allowed_contract_jurisdictions": ["US", "CA", "GB"],
+          "require_attorney_review": true,
+          "privilege_protection_enabled": true,
+          "max_contracts_per_day": 50,
+          "allowed_client_tiers": ["tier1", "tier2", "enterprise"],
+          "require_assurance_at_least": "L3",
+          "idempotency_required": true
+        }
+      }
+    }
+  },
+  "regions": ["US", "CA", "GB"],
+  "role": "legal_assistant",
+  "description": "AI agent for legal contract review operations",
+  "created_at": "2025-01-30T00:00:00Z",
+  "updated_at": "2025-01-30T00:00:00Z",
+  "version": "1.0.0"
+}
