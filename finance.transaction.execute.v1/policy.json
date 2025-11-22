@@ -12,7 +12,8 @@
     "max_exposure_per_tx_usd",
     "allowed_source_account_types",
     "restricted_source_account_types",
-    "max_exposure_per_counterparty_usd"
+    "max_exposure_per_counterparty_usd",
+    "approval_required"
   ],
   "required_fields": [
     "transaction_type",
