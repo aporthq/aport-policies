@@ -10,7 +10,8 @@
     "supported_currencies",
     "currency_limits",
     "refund_reason_codes",
-    "regions"
+    "regions",
+    "approval_required"
   ],
   "enforcement": {
     "amount_lte": "limits.finance.payment.refund.currency_limits.{currency}.max_per_tx",

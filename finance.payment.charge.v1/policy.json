@@ -13,7 +13,8 @@
     "blocked_categories",
     "max_items_per_tx",
     "require_assurance_at_least",
-    "idempotency_required"
+    "idempotency_required",
+    "approval_required"
   ],
   "required_fields": [
     "amount",

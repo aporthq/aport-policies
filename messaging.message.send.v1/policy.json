@@ -6,7 +6,7 @@
   "status": "active",
   "requires_capabilities": ["messaging.send"],
   "min_assurance": "L1",
-  "limits_required": ["msgs_per_min", "msgs_per_day"],
+  "limits_required": ["msgs_per_min", "msgs_per_day", "allowed_recipients", "approval_required"],
   "required_fields": ["channel_id", "message", "message_type"],
   "optional_fields": ["mentions", "attachments", "thread_id", "reply_to"],
   "enforcement": {

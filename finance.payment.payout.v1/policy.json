@@ -10,8 +10,10 @@
     "supported_currencies",
     "currency_limits",
     "allowed_destination_types",
+    "allowed_recipients",
     "max_payouts_per_day",
-    "compliance_checks_required"
+    "compliance_checks_required",
+    "approval_required"
   ],
   "required_fields": [
     "amount",
