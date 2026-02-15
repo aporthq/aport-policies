@@ -1,0 +1,146 @@
+{
+  "id": "system.command.execute.v1",
+  "name": "System Command Execution Policy",
+  "description": "Pre-action governance for shell command execution. Enforces command allowlists, blocked patterns, execution time limits, and environment restrictions for secure agent operations.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["system.command.execute"],
+  "min_assurance": "L0",
+  "limits_required": ["allowed_commands", "max_execution_time"],
+  "required_fields": ["command"],
+  "optional_fields": ["args", "cwd", "env", "timeout", "shell", "user"],
+  "enforcement": {
+    "command_allowlist_enforced": true,
+    "blocked_patterns_enforced": true,
+    "execution_time_enforced": true,
+    "environment_restrictions_enforced": true,
+    "user_restrictions_enforced": false
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Use command allowlists to prevent unauthorized system access",
+    "Block dangerous patterns (rm -rf, sudo, chmod 777, etc.)",
+    "Enforce execution time limits to prevent runaway processes",
+    "Restrict environment variables to prevent privilege escalation",
+    "Log all command executions for Verifiable Attestation",
+    "Use working directory restrictions to limit file system access",
+    "Implement progressive limits for new agents",
+    "Monitor command execution patterns for anomalies",
+    "Subscribe to status webhooks for instant suspend",
+    "Consider sandboxing for untrusted commands"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["command"],
+    "properties": {
+      "command": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10000,
+        "description": "Command to execute (e.g., 'npm', 'git', 'node')"
+      },
+      "args": {
+        "type": "array",
+        "items": { "type": "string" },
+        "maxItems": 100,
+        "description": "Command arguments"
+      },
+      "cwd": {
+        "type": "string",
+        "maxLength": 4096,
+        "description": "Working directory for command execution"
+      },
+      "env": {
+        "type": "object",
+        "additionalProperties": { "type": "string" },
+        "maxProperties": 100,
+        "description": "Environment variables for command execution"
+      },
+      "timeout": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 3600,
+        "description": "Command timeout in seconds"
+      },
+      "shell": {
+        "type": "string",
+        "enum": ["bash", "sh", "zsh", "fish", "powershell", "cmd"],
+        "description": "Shell to use for command execution"
+      },
+      "user": {
+        "type": "string",
+        "description": "User to run command as (requires elevated privileges)"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers being used in this request"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools being used in this request"
+      },
+      "mcp_server": {
+        "type": "string",
+        "description": "Single MCP server being used (backward compatibility)"
+      },
+      "mcp_tool": {
+        "type": "string",
+        "description": "Single MCP tool being used (backward compatibility)"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail (optional)"
+      }
+    }
+  },
+  "evaluation_rules_version": "1.0",
+  "evaluation_rules": [
+    {
+      "name": "command_allowlist",
+      "type": "expression",
+      "condition": "limits.allowed_commands.includes(context.command) || limits.allowed_commands.some(c => context.command.startsWith(c))",
+      "deny_code": "oap.command_not_allowed",
+      "description": "Command must be in allowed list"
+    },
+    {
+      "name": "blocked_patterns",
+      "type": "custom_validator",
+      "validator": "validateBlockedPatterns",
+      "deny_code": "oap.blocked_pattern",
+      "description": "Command must not contain blocked patterns"
+    },
+    {
+      "name": "execution_time_limit",
+      "type": "expression",
+      "condition": "!context.timeout || context.timeout <= limits.max_execution_time",
+      "deny_code": "oap.limit_exceeded",
+      "description": "Execution time must not exceed limit"
+    },
+    {
+      "name": "working_directory",
+      "type": "custom_validator",
+      "validator": "validateWorkingDirectory",
+      "deny_code": "oap.directory_not_allowed",
+      "description": "Working directory must be allowed"
+    },
+    {
+      "name": "environment_variables",
+      "type": "custom_validator",
+      "validator": "validateEnvironmentVariables",
+      "deny_code": "oap.env_var_blocked",
+      "description": "Environment variables must not contain blocked vars"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2026-02-14T00:00:00Z",
+  "updated_at": "2026-02-14T00:00:00Z"
+}
