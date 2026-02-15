@@ -9,7 +9,7 @@ The `messaging.message.send.v1` policy pack protects messaging endpoints with ra
 | **Requirement** | **Value** | **Description** |
 |-----------------|-----------|-----------------|
 | **Capability** | `messaging.send` | Agent must have messaging capability |
-| **Assurance** | L1+ (GitHub Verified) | Minimum assurance level required |
+| **Assurance** | L0 | Minimum assurance level required |
 | **Rate Limits** | `msgs_per_min`, `msgs_per_day` | Required rate limiting configuration |
 
 ## Limits Configuration
@@ -40,7 +40,7 @@ app.post("/messages", requirePolicy("messaging.message.send.v1"), async (req, re
   // - Channel allowlist validation
   // - Rate limiting (msgs_per_min, msgs_per_day)
   // - Mention policy enforcement
-  // - Assurance level checking (L1+)
+  // - Assurance level checking (L0+)
 
   // Your messaging logic here
   const message_id = await sendMessage({
