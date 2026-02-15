@@ -1,0 +1,162 @@
+{
+  "id": "agent.session.create.v1",
+  "name": "Agent Session Creation Policy",
+  "description": "Pre-action governance for AI agent session creation. Enforces session limits, duration restrictions, concurrent session controls, and resource allocation for secure multi-session agent deployments.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["agent.session.create"],
+  "min_assurance": "L0",
+  "limits_required": ["max_sessions_per_user", "max_session_duration"],
+  "required_fields": ["user_id", "session_type"],
+  "optional_fields": [
+    "session_name",
+    "requested_duration",
+    "resources",
+    "metadata",
+    "parent_session_id",
+    "tags"
+  ],
+  "enforcement": {
+    "session_limit_enforced": true,
+    "duration_limit_enforced": true,
+    "concurrent_session_enforced": true,
+    "resource_quota_enforced": true,
+    "session_type_enforced": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": false
+  },
+  "advice": [
+    "Enforce session limits per user to prevent resource exhaustion",
+    "Set maximum session durations to prevent zombie sessions",
+    "Limit concurrent sessions to manage system load",
+    "Track session creation for billing and auditing",
+    "Use session types to apply different policies",
+    "Implement session tagging for organization and tracking",
+    "Monitor session creation patterns for anomalies",
+    "Log all session creations for Verifiable Attestation",
+    "Subscribe to status webhooks for instant suspend",
+    "Implement progressive limits for new users"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["user_id", "session_type"],
+    "properties": {
+      "user_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200,
+        "description": "User identifier for session owner"
+      },
+      "session_type": {
+        "type": "string",
+        "enum": ["interactive", "batch", "webhook", "scheduled", "ephemeral"],
+        "description": "Type of session being created"
+      },
+      "session_name": {
+        "type": "string",
+        "maxLength": 200,
+        "description": "Human-readable session name"
+      },
+      "requested_duration": {
+        "type": "integer",
+        "minimum": 60,
+        "maximum": 86400,
+        "description": "Requested session duration in seconds"
+      },
+      "resources": {
+        "type": "object",
+        "properties": {
+          "memory_mb": {
+            "type": "integer",
+            "minimum": 128,
+            "maximum": 32768,
+            "description": "Requested memory in MB"
+          },
+          "cpu_millicores": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 8000,
+            "description": "Requested CPU in millicores"
+          },
+          "storage_gb": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Requested storage in GB"
+          }
+        },
+        "description": "Resource requirements for session"
+      },
+      "metadata": {
+        "type": "object",
+        "additionalProperties": true,
+        "maxProperties": 50,
+        "description": "Custom metadata for session"
+      },
+      "parent_session_id": {
+        "type": "string",
+        "description": "Parent session ID for nested sessions"
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "maxItems": 20,
+        "description": "Tags for session organization"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers to be used in session"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools to be used in session"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail"
+      }
+    }
+  },
+  "evaluation_rules_version": "1.0",
+  "evaluation_rules": [
+    {
+      "name": "session_duration_limit",
+      "type": "expression",
+      "condition": "!context.requested_duration || context.requested_duration <= limits.max_session_duration",
+      "deny_code": "oap.duration_limit_exceeded",
+      "description": "Session duration must not exceed limit"
+    },
+    {
+      "name": "session_type_allowed",
+      "type": "expression",
+      "condition": "!limits.allowed_session_types || limits.allowed_session_types.includes(context.session_type)",
+      "deny_code": "oap.session_type_not_allowed",
+      "description": "Session type must be in allowed list"
+    },
+    {
+      "name": "resource_quota",
+      "type": "custom_validator",
+      "validator": "validateResourceQuota",
+      "deny_code": "oap.resource_quota_exceeded",
+      "description": "Requested resources must not exceed quota"
+    },
+    {
+      "name": "concurrent_session_limit",
+      "type": "custom_validator",
+      "validator": "validateConcurrentSessions",
+      "deny_code": "oap.concurrent_limit_exceeded",
+      "description": "Agent must not exceed concurrent session limit"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2026-02-14T00:00:00Z",
+  "updated_at": "2026-02-14T00:00:00Z"
+}

@@ -1,0 +1,172 @@
+{
+  "id": "agent.tool.register.v1",
+  "name": "Agent Tool Registration Policy",
+  "description": "Pre-action governance for AI agent tool registration. Enforces tool naming conventions, capability declarations, security validations, and registration limits for secure tool ecosystem management.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["agent.tool.register"],
+  "min_assurance": "L0",
+  "limits_required": ["max_tools_per_agent", "max_registrations_per_day"],
+  "required_fields": ["tool_name", "tool_type", "capabilities"],
+  "optional_fields": [
+    "tool_description",
+    "tool_version",
+    "schema",
+    "author",
+    "repository",
+    "license",
+    "tags",
+    "metadata"
+  ],
+  "enforcement": {
+    "naming_convention_enforced": true,
+    "tool_limit_enforced": true,
+    "capability_validation_enforced": true,
+    "schema_validation_enforced": true,
+    "uniqueness_enforced": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": false
+  },
+  "advice": [
+    "Enforce tool registration limits to prevent namespace pollution",
+    "Validate tool naming conventions for consistency",
+    "Require capability declarations for security transparency",
+    "Use schema validation for tool parameter safety",
+    "Track tool registrations for auditing and discovery",
+    "Implement tool versioning for compatibility management",
+    "Use tags for tool categorization and search",
+    "Log all tool registrations for Verifiable Attestation",
+    "Subscribe to status webhooks for instant suspend",
+    "Implement progressive limits for new developers"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["tool_name", "tool_type", "capabilities"],
+    "properties": {
+      "tool_name": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 100,
+        "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$",
+        "description": "Unique tool name (lowercase, alphanumeric, dots, dashes, underscores)"
+      },
+      "tool_type": {
+        "type": "string",
+        "enum": ["function", "mcp_tool", "api", "command", "workflow", "agent"],
+        "description": "Type of tool being registered"
+      },
+      "capabilities": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$"
+        },
+        "minItems": 1,
+        "maxItems": 50,
+        "description": "List of capabilities this tool requires"
+      },
+      "tool_description": {
+        "type": "string",
+        "maxLength": 1000,
+        "description": "Human-readable tool description"
+      },
+      "tool_version": {
+        "type": "string",
+        "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-z0-9.]+)?(\\+[a-z0-9.]+)?$",
+        "description": "Semantic version (e.g., 1.0.0, 1.0.0-beta.1)"
+      },
+      "schema": {
+        "type": "object",
+        "description": "JSON Schema for tool parameters"
+      },
+      "author": {
+        "type": "string",
+        "maxLength": 200,
+        "description": "Tool author name or organization"
+      },
+      "repository": {
+        "type": "string",
+        "format": "uri",
+        "description": "Source code repository URL"
+      },
+      "license": {
+        "type": "string",
+        "enum": [
+          "MIT",
+          "Apache-2.0",
+          "GPL-3.0",
+          "BSD-3-Clause",
+          "ISC",
+          "proprietary"
+        ],
+        "description": "Tool license"
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "maxItems": 20,
+        "description": "Tags for tool categorization"
+      },
+      "metadata": {
+        "type": "object",
+        "additionalProperties": true,
+        "maxProperties": 50,
+        "description": "Custom metadata for tool"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers used by this tool"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools used by this tool"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail"
+      }
+    }
+  },
+  "evaluation_rules_version": "1.0",
+  "evaluation_rules": [
+    {
+      "name": "tool_type_allowed",
+      "type": "expression",
+      "condition": "!limits.allowed_tool_types || limits.allowed_tool_types.includes(context.tool_type)",
+      "deny_code": "oap.tool_type_not_allowed",
+      "description": "Tool type must be in allowed list"
+    },
+    {
+      "name": "naming_convention",
+      "type": "custom_validator",
+      "validator": "validateToolNaming",
+      "deny_code": "oap.invalid_tool_name",
+      "description": "Tool name must follow naming convention"
+    },
+    {
+      "name": "tool_name_unique",
+      "type": "custom_validator",
+      "validator": "validateToolUniqueness",
+      "deny_code": "oap.tool_already_exists",
+      "description": "Tool name must be unique"
+    },
+    {
+      "name": "capability_validation",
+      "type": "custom_validator",
+      "validator": "validateToolCapabilities",
+      "deny_code": "oap.capability_not_allowed",
+      "description": "All tool capabilities must be allowed"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 300,
+    "suspend_invalidate_seconds": 60
+  },
+  "deprecation": null,
+  "created_at": "2026-02-14T00:00:00Z",
+  "updated_at": "2026-02-14T00:00:00Z"
+}

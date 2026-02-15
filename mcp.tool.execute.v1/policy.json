@@ -1,0 +1,141 @@
+{
+  "id": "mcp.tool.execute.v1",
+  "name": "MCP Tool Execution Policy",
+  "description": "Pre-action governance for Model Context Protocol (MCP) tool execution. Enforces server allowlists, tool restrictions, parameter validation, and rate limits for secure MCP integration.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["mcp.tool.execute"],
+  "min_assurance": "L0",
+  "limits_required": ["allowed_servers", "max_calls_per_minute"],
+  "required_fields": ["server", "tool", "parameters"],
+  "optional_fields": ["session_id", "timeout", "context", "user_id"],
+  "enforcement": {
+    "server_allowlist_enforced": true,
+    "tool_allowlist_enforced": true,
+    "rate_limits_enforced": true,
+    "parameter_validation_enforced": true,
+    "session_tracking_enforced": false
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Use server allowlists to prevent unauthorized MCP connections",
+    "Restrict tools to minimum required for agent functionality",
+    "Enforce rate limits to prevent MCP server abuse",
+    "Validate tool parameters against expected schemas",
+    "Log all MCP tool calls for Verifiable Attestation",
+    "Use session tracking for cross-tool audit trails",
+    "Subscribe to status webhooks for instant suspend",
+    "Implement progressive limits for new MCP integrations",
+    "Monitor MCP usage patterns for anomalies",
+    "Consider tool-specific parameter restrictions"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["server", "tool", "parameters"],
+    "properties": {
+      "server": {
+        "type": "string",
+        "format": "uri",
+        "description": "MCP server URL (e.g., 'https://mcp.github.com')"
+      },
+      "tool": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200,
+        "pattern": "^[a-zA-Z0-9._-]+$",
+        "description": "MCP tool name (e.g., 'github.pull_requests.create')"
+      },
+      "parameters": {
+        "type": "object",
+        "description": "Tool-specific parameters"
+      },
+      "session_id": {
+        "type": "string",
+        "description": "MCP session identifier for tracking"
+      },
+      "timeout": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 300,
+        "description": "Tool execution timeout in seconds"
+      },
+      "context": {
+        "type": "object",
+        "description": "Additional context for tool execution"
+      },
+      "user_id": {
+        "type": "string",
+        "description": "User on whose behalf the tool is being executed"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Additional MCP servers being used"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Additional MCP tools being used"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail"
+      }
+    }
+  },
+  "evaluation_rules_version": "1.0",
+  "evaluation_rules": [
+    {
+      "name": "server_allowlist",
+      "type": "expression",
+      "condition": "limits.allowed_servers.includes(context.server) || limits.allowed_servers.includes('*')",
+      "deny_code": "oap.server_not_allowed",
+      "description": "MCP server must be in allowed list"
+    },
+    {
+      "name": "server_url_format",
+      "type": "custom_validator",
+      "validator": "validateMCPServer",
+      "deny_code": "oap.invalid_server_url",
+      "description": "MCP server URL must be valid and secure"
+    },
+    {
+      "name": "tool_allowlist",
+      "type": "expression",
+      "condition": "(limits.allowed_tools && (limits.allowed_tools.includes(context.tool) || limits.allowed_tools.includes('*'))) || (limits.allowed_tool_prefixes && limits.allowed_tool_prefixes.some(prefix => context.tool.startsWith(prefix)))",
+      "deny_code": "oap.tool_not_allowed",
+      "description": "MCP tool must be in allowed list or match allowed prefix"
+    },
+    {
+      "name": "rate_limit",
+      "type": "custom_validator",
+      "validator": "validateMCPRateLimit",
+      "deny_code": "oap.rate_limit_exceeded",
+      "description": "MCP tool calls must not exceed rate limit"
+    },
+    {
+      "name": "timeout_limit",
+      "type": "expression",
+      "condition": "!context.timeout || !limits.max_timeout || context.timeout <= limits.max_timeout",
+      "deny_code": "oap.timeout_exceeded",
+      "description": "Tool timeout must not exceed limit"
+    },
+    {
+      "name": "parameter_size_limit",
+      "type": "custom_validator",
+      "validator": "validateParameterSize",
+      "deny_code": "oap.parameter_size_exceeded",
+      "description": "Tool parameters must not exceed size limit"
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 30,
+    "suspend_invalidate_seconds": 15
+  },
+  "deprecation": null,
+  "created_at": "2026-02-14T00:00:00Z",
+  "updated_at": "2026-02-14T00:00:00Z"
+}
