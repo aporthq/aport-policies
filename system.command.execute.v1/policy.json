@@ -103,7 +103,7 @@
     {
       "name": "command_allowlist",
       "type": "expression",
-      "condition": "limits.allowed_commands.includes(context.command) || limits.allowed_commands.some(c => context.command.startsWith(c))",
+      "condition": "limits.allowed_commands.includes('*') || limits.allowed_commands.includes(context.command) || limits.allowed_commands.some(c => context.command.startsWith(c))",
       "deny_code": "oap.command_not_allowed",
       "description": "Command must be in allowed list"
     },

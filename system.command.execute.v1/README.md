@@ -2,7 +2,7 @@
 
 **Policy ID:** `system.command.execute.v1`
 **Status:** Active
-**Min Assurance:** L2
+**Min Assurance:** L0
 
 ## Overview
 
@@ -21,16 +21,14 @@ The System Command Execution Policy provides pre-action governance for shell com
 
 ## Required Limits
 
-- `allowed_commands` (array of strings): Allowlist of commands
+- `allowed_commands` (array of strings): Allowlist of commands. Use `["*"]` to allow any command (blocked_patterns still apply).
 - `max_execution_time` (integer): Maximum execution time in seconds
 
 ## Optional Limits
 
 - `blocked_patterns` (array of strings): Patterns to block (e.g., "rm -rf", "sudo")
-- `allowed_directories` (array of strings): Allowed working directories
-- `allowed_shells` (array of strings): Allowed shell types
-- `max_output_size` (integer): Maximum output size in bytes
-- `environment_allowlist` (array of strings): Allowed environment variables
+- `allowed_working_directories` (array of strings): Allowed working directories
+- `blocked_env_vars` (array of strings): Blocked environment variables (e.g., "PATH", "LD_LIBRARY_PATH")
 
 ## Context Schema
 
@@ -55,7 +53,8 @@ The System Command Execution Policy provides pre-action governance for shell com
 3. **command_allowlist**: Command must be in allowed list
 4. **blocked_patterns**: Command must not contain blocked patterns
 5. **execution_time_limit**: Timeout must not exceed max_execution_time
-6. **working_directory_allowed**: Working directory must be allowed
+6. **working_directory**: Working directory must be allowed
+7. **environment_variables**: Environment variables must not contain blocked vars
 
 ## Example Passport Limits
 
@@ -85,13 +84,16 @@ The System Command Execution Policy provides pre-action governance for shell com
         "wget | sh"
       ],
       "max_execution_time": 300,
-      "allowed_directories": [
+      "allowed_working_directories": [
         "/workspace",
         "/tmp",
         "/home/agent"
       ],
-      "allowed_shells": ["bash", "sh"],
-      "max_output_size": 1048576
+      "blocked_env_vars": [
+        "PATH",
+        "LD_LIBRARY_PATH",
+        "LD_PRELOAD"
+      ]
     }
   }
 }
@@ -121,7 +123,7 @@ The System Command Execution Policy provides pre-action governance for shell com
   "policy_id": "system.command.execute.v1",
   "passport_id": "pass_abc123",
   "owner_id": "org_12345",
-  "assurance_level": "L2",
+  "assurance_level": "L0",
   "allow": true,
   "reasons": [{
     "code": "oap.allowed",
@@ -143,7 +145,7 @@ The System Command Execution Policy provides pre-action governance for shell com
   "policy_id": "system.command.execute.v1",
   "passport_id": "pass_abc123",
   "owner_id": "org_12345",
-  "assurance_level": "L2",
+  "assurance_level": "L0",
   "allow": false,
   "reasons": [{
     "code": "oap.blocked_pattern",
@@ -176,6 +178,7 @@ The System Command Execution Policy provides pre-action governance for shell com
 - `oap.blocked_pattern`: Command contains blocked pattern
 - `oap.limit_exceeded`: Execution time exceeds limit
 - `oap.directory_not_allowed`: Working directory not allowed
+- `oap.env_var_blocked`: Environment variable is blocked
 
 ## Integration Examples
 
