@@ -59,7 +59,7 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 
 | Policy Pack | Capability | Min Assurance | Key Features |
 |-------------|------------|---------------|--------------|
-| **`messaging.message.send.v1`** | `messaging.send` | L1 | Rate limiting, channel restrictions, mention policies |
+| **`messaging.message.send.v1`** | `messaging.send` | L0 | Rate limiting, channel restrictions, mention policies |
 
 ### ⚖️ **Legal & Compliance**
 
