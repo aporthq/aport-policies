@@ -16,13 +16,21 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 
 ## 🚀 Available Policy Packs
 
+### 🤖 **Agent Management**
+
+| Policy Pack | Capability | Min Assurance | Key Features |
+|-------------|------------|---------------|--------------|
+| **`agent.session.create.v1`** | `agent.session.create` | L0 | Session limits, duration restrictions, concurrent session controls |
+| **`agent.tool.register.v1`** | `agent.tool.register` | L0 | Tool naming conventions, capability declarations, registration limits |
+
 ### 💳 **Finance & Payments**
 
 | Policy Pack | Capability | Min Assurance | Key Features |
 |-------------|------------|---------------|--------------|
 | **`finance.payment.charge.v1`** | `payments.charge` | L2 | Multi-currency limits, merchant allowlists, category blocking |
 | **`finance.payment.refund.v1`** | `finance.payment.refund` | L2 | Cross-currency denial, reason codes, order validation |
-| **`finance.transaction.execute.v1`** | `finance.transaction` | L2 | Transaction limits, risk scoring, compliance checks |
+| **`finance.payment.payout.v1`** | `payments.payout` | L3 | Per-currency caps, destination restrictions, compliance requirements |
+| **`finance.transaction.execute.v1`** | `finance.transaction` | L3 | Transaction limits, risk scoring, compliance checks |
 | **`finance.crypto.trade.v1`** | `finance.crypto.trade` | L3 | Crypto trading limits, exchange validation, volatility controls |
 
 ### 📊 **Data & Privacy**
@@ -30,21 +38,34 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 | Policy Pack | Capability | Min Assurance | Key Features |
 |-------------|------------|---------------|--------------|
 | **`data.export.create.v1`** | `data.export` | L1 | Row limits, PII handling, format validation |
-| **`data.report.ingest.v1`** | `data.report.ingest` | L1 | Data quality checks, schema validation, rate limiting |
-| **`governance.data.access.v1`** | `data.access` | L2 | Access controls, data classification, audit logging |
+| **`data.report.ingest.v1`** | `data.report.ingest` | L2 | Data quality checks, schema validation, rate limiting |
+| **`governance.data.access.v1`** | `data.access` | L3 | Access controls, data classification, audit logging |
 
 ### 🔀 **Code & Infrastructure**
 
 | Policy Pack | Capability | Min Assurance | Key Features |
 |-------------|------------|---------------|--------------|
 | **`code.repository.merge.v1`** | `repo.merge`, `repo.pr.create` | L2 | PR limits, path restrictions, review requirements |
-| **`code.release.publish.v1`** | `repo.release` | L3 | Release validation, environment checks, approval workflows |
+| **`code.release.publish.v1`** | `release` | L3 | Release validation, environment checks, approval workflows |
+
+### ⚙️ **System & Tools**
+
+| Policy Pack | Capability | Min Assurance | Key Features |
+|-------------|------------|---------------|--------------|
+| **`system.command.execute.v1`** | `system.command.execute` | L0 | Command allowlists, blocked patterns, execution time limits |
+| **`mcp.tool.execute.v1`** | `mcp.tool.execute` | L0 | Server allowlists, tool restrictions, parameter validation |
 
 ### 💬 **Communication**
 
 | Policy Pack | Capability | Min Assurance | Key Features |
 |-------------|------------|---------------|--------------|
 | **`messaging.message.send.v1`** | `messaging.send` | L1 | Rate limiting, channel restrictions, mention policies |
+
+### ⚖️ **Legal & Compliance**
+
+| Policy Pack | Capability | Min Assurance | Key Features |
+|-------------|------------|---------------|--------------|
+| **`legal.contract.review.v1`** | `legal.contract.review` | L3 | Firm-specific guardrails, privilege protection, attorney supervision |
 
 ## 🏗️ Policy Pack Structure
 
@@ -75,22 +96,29 @@ All policy packs follow the [OAP v1.0 specification](https://github.com/aporthq/
 ### **Evaluation Rules**
 ```json
 {
+  "evaluation_rules_version": "1.0",
   "evaluation_rules": [
     {
-      "name": "passport_active",
-      "condition": "passport.status == 'active'",
-      "deny_code": "oap.passport_suspended",
-      "description": "Agent passport must be active"
+      "name": "command_allowlist",
+      "type": "expression",
+      "condition": "limits.allowed_commands.includes('*') || limits.allowed_commands.includes(context.command)",
+      "deny_code": "oap.command_not_allowed",
+      "description": "Command must be in allowed list"
     },
     {
-      "name": "assurance_sufficient", 
-      "condition": "passport.assurance_level >= limits.payments.charge.require_assurance_at_least",
-      "deny_code": "oap.assurance_insufficient",
-      "description": "Insufficient assurance level for payment operations"
+      "name": "blocked_patterns",
+      "type": "custom_validator",
+      "validator": "validateBlockedPatterns",
+      "deny_code": "oap.blocked_pattern",
+      "description": "Command must not contain blocked patterns"
     }
   ]
 }
 ```
+
+**Note**: Evaluation rules support two types:
+- **`expression`**: Uses the `condition` field with JavaScript-like expressions
+- **`custom_validator`**: Uses the `validator` field to reference custom validation functions
 
 ## 🛠️ Implementation Examples
 
@@ -332,4 +360,4 @@ Check out our [Contributing Guide](CONTRIBUTING.md) to get started.
 
 **🛡️ Secure your AI agents. Trust but verify.**
 
-**Last Updated**: 2025-10-08 14:54:16 UTC
+**Last Updated**: 2026-02-15 18:32:09 UTC
