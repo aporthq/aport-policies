@@ -46,7 +46,7 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 | Policy Pack | Capability | Min Assurance | Key Features |
 |-------------|------------|---------------|--------------|
 | **`code.repository.merge.v1`** | `repo.merge`, `repo.pr.create` | L2 | PR limits, path restrictions, review requirements |
-| **`code.release.publish.v1`** | `release` | L3 | Release validation, environment checks, approval workflows |
+| **`code.release.publish.v1`** | `repo.release` | L3 | Release validation, environment checks, approval workflows |
 
 ### ⚙️ **System & Tools**
 
