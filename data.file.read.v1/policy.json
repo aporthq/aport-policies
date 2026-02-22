@@ -1,0 +1,126 @@
+{
+  "id": "data.file.read.v1",
+  "name": "File Read Access Policy",
+  "description": "Pre-action governance for file read operations. Enforces path allowlists, blocked patterns (credentials, SSH keys, secrets), file size limits, and audit trails for secure agent file access.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["data.file.read"],
+  "min_assurance": "L0",
+  "limits_required": ["allowed_paths"],
+  "required_fields": ["file_path"],
+  "optional_fields": ["offset", "limit", "encoding"],
+  "enforcement": {
+    "path_allowlist_enforced": true,
+    "blocked_patterns_enforced": true,
+    "file_size_enforced": true,
+    "extension_restrictions_enforced": false
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Use path allowlists to restrict file access to specific directories",
+    "Block sensitive file patterns (SSH keys, credentials, .env files)",
+    "Enforce file size limits to prevent memory exhaustion",
+    "Log all file read operations for Verifiable Attestation",
+    "Use working directory restrictions in combination with path allowlists",
+    "Implement progressive limits for new agents (start restrictive, expand based on behavior)",
+    "Monitor file access patterns for anomalies (e.g., reading 1000s of files)",
+    "Subscribe to status webhooks for instant suspend on suspicious activity",
+    "Consider using symbolic link restrictions to prevent directory traversal",
+    "Audit logs should capture file path, size, and timestamp"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["file_path"],
+    "properties": {
+      "file_path": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096,
+        "description": "Absolute or relative file path to read"
+      },
+      "offset": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Line number to start reading from (optional)"
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100000,
+        "description": "Maximum number of lines to read (optional)"
+      },
+      "encoding": {
+        "type": "string",
+        "enum": ["utf-8", "utf-16", "ascii", "base64", "binary"],
+        "description": "File encoding (optional, default: utf-8)"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers being used in this request"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools being used in this request"
+      },
+      "mcp_server": {
+        "type": "string",
+        "description": "Single MCP server being used (backward compatibility)"
+      },
+      "mcp_tool": {
+        "type": "string",
+        "description": "Single MCP tool being used (backward compatibility)"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail (optional)"
+      }
+    }
+  },
+  "evaluation_rules_version": "1.0",
+  "evaluation_rules": [
+    {
+      "name": "path_allowlist",
+      "type": "expression",
+      "condition": "limits.allowed_paths.includes('*') || limits.allowed_paths.some(p => context.file_path.startsWith(p) || context.file_path.includes(p.replace('*', '')))",
+      "deny_code": "oap.path_not_allowed",
+      "description": "File path must be in allowed list or match allowed pattern",
+      "message": "File path not in allowed list. Configure passport limits.data.file.read.allowed_paths to grant access."
+    },
+    {
+      "name": "blocked_patterns",
+      "type": "custom_validator",
+      "validator": "validateFilePathPatterns",
+      "deny_code": "oap.blocked_pattern",
+      "description": "File path must not match blocked patterns (credentials, SSH keys, secrets)",
+      "message": "File path matches blocked pattern. Reading sensitive files like SSH keys, credentials, or .env files is not allowed."
+    },
+    {
+      "name": "file_size_limit",
+      "type": "expression",
+      "condition": "!limits.max_file_size_mb || true",
+      "deny_code": "oap.limit_exceeded",
+      "description": "File size must not exceed limit (checked at runtime)",
+      "message": "File size exceeds configured limit. Reduce file size or increase passport limit."
+    },
+    {
+      "name": "extension_check",
+      "type": "custom_validator",
+      "validator": "validateFileExtension",
+      "deny_code": "oap.extension_not_allowed",
+      "description": "File extension must be allowed (if configured)",
+      "message": "File extension not allowed. Configure passport limits.data.file.read.allowed_extensions to grant access."
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2026-02-21T00:00:00Z",
+  "updated_at": "2026-02-21T00:00:00Z"
+}
