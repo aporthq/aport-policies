@@ -1,0 +1,152 @@
+{
+  "id": "data.file.write.v1",
+  "name": "File Write Access Policy",
+  "description": "Pre-action governance for file write operations. Enforces path allowlists, blocked paths (system directories, binaries), extension restrictions, size limits, and rate limiting for secure agent file modifications.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["data.file.write"],
+  "min_assurance": "L0",
+  "limits_required": ["allowed_paths"],
+  "required_fields": ["file_path"],
+  "optional_fields": ["content", "content_length", "encoding", "append", "create_dirs"],
+  "enforcement": {
+    "path_allowlist_enforced": true,
+    "blocked_paths_enforced": true,
+    "extension_restrictions_enforced": true,
+    "file_size_enforced": true,
+    "rate_limiting_enforced": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Use path allowlists to restrict file writes to specific directories",
+    "Block system directories (/etc, /bin, /usr/bin, /System, C:\\Windows)",
+    "Enforce allowed file extensions to prevent malicious file creation",
+    "Set file size limits to prevent disk exhaustion attacks",
+    "Implement rate limiting (writes per hour) to detect anomalous behavior",
+    "Log all file write operations for Verifiable Attestation and rollback",
+    "Use working directory restrictions in combination with path allowlists",
+    "Monitor write patterns for anomalies (e.g., writing to 100s of files/hour)",
+    "Subscribe to status webhooks for instant suspend on suspicious activity",
+    "Consider implementing write sandboxing for untrusted agents",
+    "Audit logs should capture file path, size, hash, and timestamp"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["file_path"],
+    "properties": {
+      "file_path": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096,
+        "description": "Absolute or relative file path to write"
+      },
+      "content": {
+        "type": "string",
+        "maxLength": 10485760,
+        "description": "File content to write (max 10MB)"
+      },
+      "content_length": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 10485760,
+        "description": "Content length in bytes (for size validation without transferring full content)"
+      },
+      "encoding": {
+        "type": "string",
+        "enum": ["utf-8", "utf-16", "ascii", "base64", "binary"],
+        "description": "File encoding (optional, default: utf-8)"
+      },
+      "append": {
+        "type": "boolean",
+        "description": "Append to file instead of overwriting (optional, default: false)"
+      },
+      "create_dirs": {
+        "type": "boolean",
+        "description": "Create parent directories if they don't exist (optional, default: false)"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers being used in this request"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools being used in this request"
+      },
+      "mcp_server": {
+        "type": "string",
+        "description": "Single MCP server being used (backward compatibility)"
+      },
+      "mcp_tool": {
+        "type": "string",
+        "description": "Single MCP tool being used (backward compatibility)"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail (optional)"
+      }
+    }
+  },
+  "evaluation_rules_version": "1.0",
+  "evaluation_rules": [
+    {
+      "name": "path_allowlist",
+      "type": "expression",
+      "condition": "limits.allowed_paths.includes('*') || limits.allowed_paths.some(p => context.file_path.startsWith(p) || context.file_path.includes(p.replace('*', '')))",
+      "deny_code": "oap.path_not_allowed",
+      "description": "File path must be in allowed list or match allowed pattern",
+      "message": "File path not in allowed list. Configure passport limits.data.file.write.allowed_paths to grant access."
+    },
+    {
+      "name": "blocked_paths",
+      "type": "custom_validator",
+      "validator": "validateWriteBlockedPaths",
+      "deny_code": "oap.path_blocked",
+      "description": "File path must not be in blocked list (system directories, binaries)",
+      "message": "Writing to system directories or critical files is not allowed."
+    },
+    {
+      "name": "extension_check",
+      "type": "custom_validator",
+      "validator": "validateWriteFileExtension",
+      "deny_code": "oap.extension_not_allowed",
+      "description": "File extension must be in allowed list (if configured)",
+      "message": "File extension not allowed. Configure passport limits.data.file.write.allowed_extensions to grant access."
+    },
+    {
+      "name": "file_size_limit",
+      "type": "expression",
+      "condition": "!limits.max_file_size_mb || !context.content_length || context.content_length <= (limits.max_file_size_mb * 1048576)",
+      "deny_code": "oap.limit_exceeded",
+      "description": "File size must not exceed configured limit",
+      "message": "File size exceeds configured limit. Reduce content size or increase passport limit."
+    },
+    {
+      "name": "rate_limit",
+      "type": "custom_validator",
+      "validator": "validateWriteRateLimit",
+      "deny_code": "oap.rate_limit_exceeded",
+      "description": "Write operations must not exceed rate limit (writes per hour)",
+      "message": "Write rate limit exceeded. Too many file writes in the current time window."
+    },
+    {
+      "name": "parent_directory_check",
+      "type": "custom_validator",
+      "validator": "validateParentDirectory",
+      "deny_code": "oap.directory_not_allowed",
+      "description": "Parent directory must exist or create_dirs must be allowed",
+      "message": "Parent directory does not exist and create_dirs is not allowed."
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2026-02-21T00:00:00Z",
+  "updated_at": "2026-02-21T00:00:00Z"
+}
