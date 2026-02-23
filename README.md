@@ -87,7 +87,7 @@ All policy packs follow the [OAP v1.0 specification](https://github.com/aporthq/
 ### **OAP Compliance Features**
 - ✅ **Standardized Error Codes** - Uses `oap.*` error codes
 - ✅ **JSON Schema Validation** - Full context validation via `required_context`
-- ✅ **Nested Limits Structure** - `limits.{capability}.*` format
+- ✅ **Nested Limits Structure** - `limits.{capability}.*` format (API accepts both nested `limits.payments.charge` and flat `limits["payments.charge"]` for compatibility)
 - ✅ **Capability-based Authorization** - Proper capability checking
 - ✅ **Assurance Level Validation** - Dynamic assurance requirements
 - ✅ **Idempotency Support** - Duplicate prevention
