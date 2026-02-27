@@ -8,6 +8,15 @@ Protect your payment charge endpoints with APort's standardized policy pack. Thi
 - **Risk**: Financial transactions, fraud prevention, regulatory compliance
 - **Impact**: Direct monetary loss, chargeback disputes, audit findings
 
+## Passport limits shape
+
+The evaluator accepts limits under the capability in **either** shape (so passports from UIs or APIs using either form work):
+
+- **Nested**: `limits.payments.charge` (object with key `payments`, then `charge`)
+- **Flat**: `limits["payments.charge"]` (single key with a dot in the name)
+
+Policy JSON and docs use the logical path `limits.payments.charge.*`; the runtime resolves both.
+
 ## Requirements
 
 | Requirement | Value | Description |
@@ -15,7 +24,7 @@ Protect your payment charge endpoints with APort's standardized policy pack. Thi
 | **Capability** | `payments.charge` | Agent must have charge capability |
 | **Assurance** | `L2` or higher | Email + GitHub verification minimum |
 | **Limits** | `currency_limits.{ISO4217}.{max_per_tx,daily_cap}` | Per-currency transaction and daily limits |
-| **Limits** | `allowed_merchant_ids[]` | Merchant allowlist (optional) |
+| **Limits** | `allowed_merchant_ids[]` or `allowed_merchants[]` | Merchant allowlist (optional); both keys accepted |
 | **Limits** | `allowed_countries[]` | Country allowlist (optional) |
 | **Limits** | `blocked_categories[]` | Category blocklist (optional) |
 | **Limits** | `max_items_per_tx` | Maximum items per transaction (optional) |
