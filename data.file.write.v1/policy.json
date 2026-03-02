@@ -8,7 +8,13 @@
   "min_assurance": "L0",
   "limits_required": ["allowed_paths"],
   "required_fields": ["file_path"],
-  "optional_fields": ["content", "content_length", "encoding", "append", "create_dirs"],
+  "optional_fields": [
+    "content",
+    "content_length",
+    "encoding",
+    "append",
+    "create_dirs"
+  ],
   "enforcement": {
     "path_allowlist_enforced": true,
     "blocked_paths_enforced": true,
@@ -119,8 +125,8 @@
     },
     {
       "name": "file_size_limit",
-      "type": "expression",
-      "condition": "!limits.max_file_size_mb || !context.content_length || context.content_length <= (limits.max_file_size_mb * 1048576)",
+      "type": "custom_validator",
+      "validator": "validateFileContentSize",
       "deny_code": "oap.limit_exceeded",
       "description": "File size must not exceed configured limit",
       "message": "File size exceeds configured limit. Reduce content size or increase passport limit."

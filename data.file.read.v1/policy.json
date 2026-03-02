@@ -102,9 +102,9 @@
     {
       "name": "file_size_limit",
       "type": "expression",
-      "condition": "!limits.max_file_size_mb || true",
+      "condition": "!limits.max_file_size_mb || !context.file_size_mb || context.file_size_mb <= limits.max_file_size_mb",
       "deny_code": "oap.limit_exceeded",
-      "description": "File size must not exceed limit (checked at runtime)",
+      "description": "File size must not exceed limit",
       "message": "File size exceeds configured limit. Reduce file size or increase passport limit."
     },
     {

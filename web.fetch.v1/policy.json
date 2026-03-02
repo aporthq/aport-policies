@@ -1,0 +1,149 @@
+{
+  "id": "web.fetch.v1",
+  "name": "Web Fetch Access Policy",
+  "description": "Pre-action governance for web fetch/HTTP requests. Enforces URL allowlists, blocked domains (data exfiltration endpoints), method restrictions, header controls, and rate limiting to prevent data leakage and unauthorized external communications.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["web.fetch"],
+  "min_assurance": "L0",
+  "limits_required": ["allowed_domains"],
+  "required_fields": ["url"],
+  "optional_fields": ["method", "headers", "body", "timeout"],
+  "enforcement": {
+    "domain_allowlist_enforced": true,
+    "blocked_domains_enforced": true,
+    "method_restrictions_enforced": true,
+    "header_restrictions_enforced": true,
+    "rate_limiting_enforced": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": true
+  },
+  "advice": [
+    "Use domain allowlists to restrict web requests to trusted domains only",
+    "Block known data exfiltration domains (pastebin, file sharing services)",
+    "Restrict HTTP methods (e.g., only allow GET/POST, block PUT/DELETE for read-only agents)",
+    "Block sensitive headers that could leak credentials or tokens",
+    "Implement rate limiting (requests per hour) to detect scanning/exfiltration",
+    "Log all web requests with full URL and headers for audit trail",
+    "Consider blocking requests to private IP ranges (localhost, 192.168.*, 10.*)",
+    "Monitor request patterns for anomalies (e.g., 100s of requests to same domain)",
+    "Subscribe to status webhooks for instant suspend on suspicious activity",
+    "Use URL pattern matching to allow specific API endpoints only",
+    "Audit logs should capture URL, method, response status, and timestamp"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["url"],
+    "properties": {
+      "url": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 8192,
+        "description": "URL to fetch (must be http:// or https://)"
+      },
+      "method": {
+        "type": "string",
+        "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+        "description": "HTTP method (default: GET)"
+      },
+      "headers": {
+        "type": "object",
+        "description": "HTTP headers to send with request",
+        "additionalProperties": { "type": "string" }
+      },
+      "body": {
+        "type": "string",
+        "maxLength": 10485760,
+        "description": "Request body (max 10MB)"
+      },
+      "timeout": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 300000,
+        "description": "Request timeout in milliseconds (max 5 minutes)"
+      },
+      "mcp_servers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP servers being used in this request"
+      },
+      "mcp_tools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "MCP tools being used in this request"
+      },
+      "mcp_server": {
+        "type": "string",
+        "description": "Single MCP server being used (backward compatibility)"
+      },
+      "mcp_tool": {
+        "type": "string",
+        "description": "Single MCP tool being used (backward compatibility)"
+      },
+      "mcp_session": {
+        "type": "string",
+        "description": "MCP session identifier for audit trail (optional)"
+      }
+    }
+  },
+  "evaluation_rules_version": "1.0",
+  "evaluation_rules": [
+    {
+      "name": "domain_allowlist",
+      "type": "expression",
+      "condition": "limits.allowed_domains.includes('*') || limits.allowed_domains.some(d => context.url.includes(d))",
+      "deny_code": "oap.domain_not_allowed",
+      "description": "URL domain must be in allowed list",
+      "message": "Domain not in allowed list. Configure passport limits.allowed_domains to grant access."
+    },
+    {
+      "name": "blocked_domains",
+      "type": "custom_validator",
+      "validator": "validateWebFetchBlockedDomains",
+      "deny_code": "oap.domain_blocked",
+      "description": "URL must not be in blocked domains (data exfiltration, malicious sites)",
+      "message": "Requests to this domain are blocked (potential data exfiltration or security risk)."
+    },
+    {
+      "name": "private_ip_check",
+      "type": "custom_validator",
+      "validator": "validateWebFetchPrivateIP",
+      "deny_code": "oap.private_ip_blocked",
+      "description": "Requests to private IP ranges blocked (if configured)",
+      "message": "Requests to private IP addresses (localhost, 192.168.*, 10.*, etc.) are blocked."
+    },
+    {
+      "name": "method_restriction",
+      "type": "expression",
+      "condition": "!limits.allowed_methods || !context.method || limits.allowed_methods.includes(context.method)",
+      "deny_code": "oap.method_not_allowed",
+      "description": "HTTP method must be in allowed list (if configured)",
+      "message": "HTTP method not allowed. Configure passport limits.allowed_methods to grant access."
+    },
+    {
+      "name": "header_restriction",
+      "type": "custom_validator",
+      "validator": "validateWebFetchHeaders",
+      "deny_code": "oap.header_blocked",
+      "description": "Headers must not contain blocked patterns (credentials, tokens)",
+      "message": "Request contains blocked headers (potential credential leakage)."
+    },
+    {
+      "name": "rate_limit",
+      "type": "custom_validator",
+      "validator": "validateWebFetchRateLimit",
+      "deny_code": "oap.rate_limit_exceeded",
+      "description": "Web requests must not exceed rate limit (requests per hour)",
+      "message": "Web fetch rate limit exceeded. Too many requests in the current time window."
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 60,
+    "suspend_invalidate_seconds": 30
+  },
+  "deprecation": null,
+  "created_at": "2026-03-01T00:00:00Z",
+  "updated_at": "2026-03-01T00:00:00Z"
+}
