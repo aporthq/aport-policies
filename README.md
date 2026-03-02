@@ -55,6 +55,14 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 | **`system.command.execute.v1`** | `system.command.execute` | L0 | Command allowlists, blocked patterns, execution time limits |
 | **`mcp.tool.execute.v1`** | `mcp.tool.execute` | L0 | Server allowlists, tool restrictions, parameter validation |
 
+### 🌐 **Web & Browser**
+
+| Policy Pack | Capability | Min Assurance | Key Features |
+|-------------|------------|---------------|--------------|
+| **`web.fetch.v1`** | `web.fetch` | L0 | URL allowlists, blocked domains, method/header restrictions, rate limiting |
+| **`web.browser.v1`** | `web.browser` | L0 | URL allowlists, action restrictions (navigate/click/type), screenshot/navigation rate limits |
+
+
 ### 💬 **Communication**
 
 | Policy Pack | Capability | Min Assurance | Key Features |
