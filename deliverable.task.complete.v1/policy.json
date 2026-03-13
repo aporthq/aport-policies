@@ -1,0 +1,169 @@
+{
+  "id": "deliverable.task.complete.v1",
+  "name": "Task Completion Gate",
+  "description": "Pre-action governance for an agent marking a task complete. Enforces that the agent has provided required deliverable evidence — summary, acceptance criteria attestations, test status, reviewer identity — before done is authorized.",
+  "version": "1.0.0",
+  "status": "active",
+  "requires_capabilities": ["deliverable.task.complete"],
+  "min_assurance": "L0",
+  "limits_required": [],
+  "required_fields": ["task_id", "output_type", "criteria_attestations"],
+  "optional_fields": [
+    "summary",
+    "tests_passing",
+    "reviewer_agent_id",
+    "author_agent_id",
+    "output_content"
+  ],
+  "enforcement": {
+    "criteria_attestation_enforced": true,
+    "summary_enforced": true,
+    "tests_enforced": true,
+    "reviewer_enforced": true,
+    "pattern_scan_enforced": true
+  },
+  "mcp": {
+    "require_allowlisted_if_present": false
+  },
+  "advice": [
+    "Define acceptance_criteria in passport limits.deliverable.task.complete.acceptance_criteria — this is a new pattern, unique to this capability",
+    "acceptance_criteria is an array of {id, description} objects — no other capability uses this structure",
+    "Set require_summary: true and min_summary_words to enforce written summaries",
+    "Set require_tests_passing: true for code agents to block completion without passing tests",
+    "Set require_different_reviewer: true in multi-agent pipelines to prevent self-approval — also submit author_agent_id in context",
+    "Set scan_output: true with blocked_patterns to catch TODO, FIXME, placeholder, console.log (max 100 patterns enforced)",
+    "The deny_code tells the agent exactly what is missing — it can self-correct and retry",
+    "criteria_attestations must include non-empty evidence strings, not just met: true",
+    "Use task_id to correlate completion receipts with your task management system"
+  ],
+  "required_context": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": ["task_id", "output_type", "criteria_attestations"],
+    "properties": {
+      "task_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "description": "Unique identifier for the task being completed"
+      },
+      "output_type": {
+        "type": "string",
+        "enum": ["code", "document", "analysis", "plan", "data", "other"],
+        "description": "Type of deliverable produced"
+      },
+      "summary": {
+        "type": "string",
+        "maxLength": 10000,
+        "description": "Agent-written summary of what was done. Required if limits.deliverable.task.complete.require_summary is true."
+      },
+      "tests_passing": {
+        "type": "boolean",
+        "description": "Whether all tests are currently passing. Required if limits.deliverable.task.complete.require_tests_passing is true."
+      },
+      "reviewer_agent_id": {
+        "type": "string",
+        "description": "The agent_id of the reviewing agent. Required if limits.deliverable.task.complete.require_different_reviewer is true."
+      },
+      "author_agent_id": {
+        "type": "string",
+        "description": "The agent_id of the agent submitting this completion. Required when require_different_reviewer is true — without it, cross-agent check cannot be enforced."
+      },
+      "criteria_attestations": {
+        "type": "array",
+        "minItems": 0,
+        "items": {
+          "type": "object",
+          "required": ["criterion_id", "met", "evidence"],
+          "properties": {
+            "criterion_id": {
+              "type": "string",
+              "description": "Must match an id from limits.deliverable.task.complete.acceptance_criteria"
+            },
+            "met": {
+              "type": "boolean"
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000,
+              "description": "Concrete evidence: CI run id, file path, command output, PR url, grep result, etc."
+            }
+          }
+        },
+        "description": "One attestation per acceptance criterion defined in passport limits. acceptance_criteria is a new pattern introduced by this capability."
+      },
+      "output_content": {
+        "type": "string",
+        "maxLength": 10485760,
+        "description": "Optional. Output text to scan for blocked patterns. Only used if limits.deliverable.task.complete.scan_output is true."
+      }
+    }
+  },
+  "evaluation_rules_version": "1.0",
+  "evaluation_rules": [
+    {
+      "name": "all_passport_criteria_attested",
+      "type": "expression",
+      "condition": "!limits.acceptance_criteria || limits.acceptance_criteria.every(c => context.criteria_attestations.some(a => a.criterion_id === c.id))",
+      "deny_code": "oap.criteria_incomplete",
+      "description": "Context must include an attestation for every criterion_id defined in passport limits.acceptance_criteria. NOTE: requires test case for when acceptance_criteria is absent/undefined — expression engine must handle !undefined === true gracefully.",
+      "message": "Missing attestations for one or more passport-defined acceptance criteria. Submit an attestation for every criterion_id in your passport."
+    },
+    {
+      "name": "all_criteria_have_evidence",
+      "type": "custom_validator",
+      "validator": "validateDeliverableCriteriaEvidence",
+      "deny_code": "oap.evidence_missing",
+      "description": "Every criterion attestation must include a non-empty evidence string",
+      "message": "All criterion attestations require an evidence string. Provide a CI run id, file path, command output, or URL."
+    },
+    {
+      "name": "all_criteria_attested",
+      "type": "custom_validator",
+      "validator": "validateDeliverableCriteriaMet",
+      "deny_code": "oap.criteria_not_met",
+      "description": "All submitted attestations must have met: true",
+      "message": "One or more acceptance criteria were not met. Resolve all criteria before marking complete."
+    },
+    {
+      "name": "summary_required",
+      "type": "custom_validator",
+      "validator": "validateDeliverableSummaryWords",
+      "deny_code": "oap.summary_insufficient",
+      "description": "Summary must meet minimum word count if required. Uses split+filter instead of regex to avoid expression engine regex compatibility issues.",
+      "message": "Summary is required and must meet the minimum word count. Write a clear description of what was done."
+    },
+    {
+      "name": "tests_passing_required",
+      "type": "custom_validator",
+      "validator": "validateDeliverableTestsPassing",
+      "deny_code": "oap.tests_not_passing",
+      "description": "Tests must be passing if required by passport",
+      "message": "Passport requires all tests to pass before task completion. Fix failing tests and retry."
+    },
+    {
+      "name": "different_reviewer_required",
+      "type": "expression",
+      "condition": "!limits.require_different_reviewer || (context.reviewer_agent_id && context.author_agent_id && context.reviewer_agent_id !== context.author_agent_id)",
+      "deny_code": "oap.self_review_not_allowed",
+      "description": "A different agent must have reviewed. Requires both reviewer_agent_id AND author_agent_id in context — without author_agent_id the check cannot be enforced and will deny. This is intentional.",
+      "message": "Passport requires review by a different agent. Submit both reviewer_agent_id and author_agent_id. An agent cannot approve its own work."
+    },
+    {
+      "name": "no_blocked_patterns",
+      "type": "custom_validator",
+      "validator": "validateDeliverableBlockedPatterns",
+      "deny_code": "oap.blocked_pattern_detected",
+      "description": "Output content must not contain blocked patterns if scan_output is enabled. Only runs if scan_output: true AND output_content is present.",
+      "message": "Output contains blocked content. Remove all instances of the blocked pattern before marking complete."
+    }
+  ],
+  "cache": {
+    "default_ttl_seconds": 0,
+    "suspend_invalidate_seconds": 0
+  },
+  "deprecation": null,
+  "created_at": "2026-03-13T00:00:00Z",
+  "updated_at": "2026-03-13T00:00:00Z"
+}
