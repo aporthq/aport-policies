@@ -23,6 +23,12 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 | **`agent.session.create.v1`** | `agent.session.create` | L0 | Session limits, duration restrictions, concurrent session controls |
 | **`agent.tool.register.v1`** | `agent.tool.register` | L0 | Tool naming conventions, capability declarations, registration limits |
 
+### ✅ **Task Completion**
+
+| Policy Pack | Capability | Min Assurance | Key Features |
+|-------------|------------|---------------|--------------|
+| **`deliverable.task.complete.v1`** | `deliverable.task.complete` | L0 | Summary word count, acceptance criteria attestations, tests passing, different reviewer, blocked pattern scan |
+
 ### 💳 **Finance & Payments**
 
 | Policy Pack | Capability | Min Assurance | Key Features |
