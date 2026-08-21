@@ -8,9 +8,17 @@ The `code.repository.merge.v1` policy pack protects repository operations with P
 
 | **Requirement** | **Value** | **Description** |
 |-----------------|-----------|-----------------|
-| **Capability** | `repo.pr.create`, `repo.merge` | Agent must have repository capabilities |
+| **Capability** | Action-dependent | `pr.merge` requires `repo.merge`; `pr.create`, `pr.update`, and `repo.push` currently require `repo.pr.create` until narrower repository capabilities are introduced |
 | **Assurance** | L2+ (GitHub Verified) | Minimum assurance level required |
 | **Limits** | PR/merge daily caps, size limits | Required operational limits |
+
+## Supported Actions
+
+- **`pr.create`**: creates a pull request and consumes the daily PR-create counter.
+- **`pr.update`**: updates or reconciles an existing pull request without consuming the daily PR-create counter.
+- **`pr.merge`**: merges a pull request and consumes the daily merge counter.
+- **`repo.push`**: records a repository push or branch update without consuming PR-create or merge counters.
+- Legacy aliases such as `push`, `pull_request.create`, `pull_request.update`, `repo.merge`, `branch.create`, and `branch.delete` are accepted for backward compatibility.
 
 ## Limits Configuration
 
@@ -22,19 +30,23 @@ The `code.repository.merge.v1` policy pack protects repository operations with P
 
 ### PR Creation Parameters
 
-- **`allowed_repos`**: Comma-separated list of allowed repositories
+- **`allowed_repos`**: Comma-separated list of allowed repositories. Supports exact values, `*`, and `**` patterns such as `aporthq/*`.
 - **`allowed_base_branches`**: Comma-separated list of allowed base branches (main, develop)
-- **`path_allowlist`**: Comma-separated list of allowed file paths/patterns
+- **`path_allowlist` / `allowed_paths`**: Comma-separated list of allowed file paths/patterns. Supports exact values, `*`, and `**`.
 - **`max_files_changed`**: Maximum number of files that can be changed in one PR
 - **`max_total_added_lines`**: Maximum total lines that can be added in one PR
 
 ### Merge Parameters
 
-- **`allowed_repos`**: Comma-separated list of allowed repositories for merging
+- **`allowed_repos`**: Comma-separated list of allowed repositories for merging. Supports exact values, `*`, and `**` patterns.
 - **`allowed_base_branches`**: Comma-separated list of allowed base branches for merging
 - **`required_labels`**: Comma-separated list of required PR labels for merging
 - **`required_reviews`**: Minimum number of required reviews for merging
 - **`path_allowlist`**: Comma-separated list of allowed file paths for merging
+
+### GitHub Actor/App Allowlist
+
+If `passport.integrations.github.allowed_actors` or `passport.integrations.github.allowed_apps` is configured, the request must include a matching `github_actor` or GitHub App slug. If no allowlist is configured, the policy does not deny by default based on actor naming.
 
 ## Example Usage
 
@@ -234,6 +246,11 @@ This policy requires the following context (JSON Schema):
         "pr.create",
         "pr.merge",
         "pr.update",
+        "repo.push",
+        "push",
+        "pull_request.create",
+        "pull_request.update",
+        "repo.merge",
         "branch.create",
         "branch.delete"
       ],
@@ -284,4 +301,3 @@ You can also fetch this live via the discovery endpoint:
 ```bash
 curl -s "https://aport.io/api/policies/code.repository.merge.v1?format=schema"
 ```
-

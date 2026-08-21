@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["repo.pr.create", "repo.merge"],
+  "capability_mode": "action_dependent",
   "min_assurance": "L2",
   "limits_required": [
     "max_prs_per_day",
@@ -57,6 +58,11 @@
           "pr.create",
           "pr.merge",
           "pr.update",
+          "repo.push",
+          "push",
+          "pull_request.create",
+          "pull_request.update",
+          "repo.merge",
           "branch.create",
           "branch.delete"
         ],
