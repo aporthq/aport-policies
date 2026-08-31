@@ -40,9 +40,11 @@ The `code.repository.merge.v1` policy pack protects repository operations with P
 
 - **`allowed_repos`**: Comma-separated list of allowed repositories for merging. Supports exact values, `*`, and `**` patterns.
 - **`allowed_base_branches`**: Comma-separated list of allowed base branches for merging
-- **`required_labels`**: Comma-separated list of required PR labels for merging
-- **`required_reviews`**: Minimum number of required reviews for merging
 - **`path_allowlist`**: Comma-separated list of allowed file paths for merging
+
+Review counts and required labels should be enforced with GitHub branch
+protection or repository rules. APort records repository action evidence and
+enforces passport-scoped repository, branch, path, and size limits.
 
 ### GitHub Actor/App Allowlist
 
@@ -89,8 +91,6 @@ app.post("/repo/merge", requirePolicy("code.repository.merge.v1"), async (req, r
 
   // Policy automatically enforces:
   // - Repository and branch allowlists
-  // - Required labels checking
-  // - Required reviews validation
   // - PR size limits
   // - Daily merge limits
 
@@ -132,19 +132,6 @@ app.post("/repo/merge", requirePolicy("code.repository.merge.v1"), async (req, r
 }
 ```
 
-### Insufficient Reviews
-
-```json
-{
-  "error": "repo_policy_violation",
-  "reason": "insufficient_reviews",
-  "required_reviews": 2,
-  "current_reviews": 1,
-  "required_labels": ["approved", "security-reviewed"],
-  "missing_labels": ["security-reviewed"]
-}
-```
-
 ### Daily Limit Exceeded
 
 ```json
@@ -170,9 +157,9 @@ app.post("/repo/merge", requirePolicy("code.repository.merge.v1"), async (req, r
 
 ### Merging
 
-1. **Review Requirements**: Enforce minimum review counts
-2. **Label Requirements**: Require specific labels (approved, tested)
-3. **Branch Protection**: Protect critical branches (main, production)
+1. **GitHub Branch Protection**: Enforce minimum review counts in GitHub
+2. **Repository Rules**: Require labels or status checks in GitHub where needed
+3. **APort Branch Limits**: Restrict which base branches an agent may target
 4. **Size Validation**: Ensure PRs aren't too large to review safely
 5. **Verifiable Attestation**: Log all merge operations
 
@@ -210,12 +197,12 @@ async function createPullRequest({ repo, base_branch, head_branch, title, files_
 - **Production Ready**: Serious governance controls for production environments
 - **GitHub Demo**: Perfect for demonstrating AI code automation with safety
 - **Scalable**: Works with any Git platform (GitHub, GitLab, Bitbucket)
-- **Compliance**: Built-in Verifiable Attestation and approval workflows
+- **Compliance**: Built-in Verifiable Attestation for repository operations
 
 ## Integration Examples
 
 - **Code Generation**: AI agents creating PRs with safety limits
-- **Documentation Updates**: Automated doc updates with review requirements
+- **Documentation Updates**: Automated doc updates with repository/path limits
 - **Dependency Updates**: Automated dependency PRs with size limits
 - **Bug Fixes**: AI-generated bug fixes with human review
 - **Feature Development**: Controlled AI feature development with governance

@@ -51,8 +51,8 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 
 | Policy Pack | Capability | Min Assurance | Key Features |
 |-------------|------------|---------------|--------------|
-| **`code.repository.merge.v1`** | `repo.merge`, `repo.pr.create` | L2 | PR limits, path restrictions, review requirements |
-| **`code.release.publish.v1`** | `repo.release` | L3 | Release validation, environment checks, approval workflows |
+| **`code.repository.merge.v1`** | `repo.merge`, `repo.pr.create` | L2 | Repository allowlists, branch controls, path restrictions, PR size limits |
+| **`code.release.publish.v1`** | `repo.release` | L3 | Release validation, repository allowlists, sensitive-file blocks |
 
 ### ⚙️ **System & Tools**
 
@@ -186,31 +186,32 @@ async def create_charge(request: Request, charge_data: dict):
 
 ### GitHub Actions Integration
 ```yaml
-name: APort Verify PR
-on: [pull_request]
+name: APort Repository Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+  id-token: write
 
 jobs:
-  verify:
+  aport:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify via APort
-        run: |
-          curl -s -X POST "https://api.aport.io/api/verify/policy/code.repository.merge.v1" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "agent_id": "${{ secrets.APORT_AGENT_ID }}",
-              "context": {
-                "repo": "${{ github.repository }}",
-                "base": "${{ github.event.pull_request.base.ref }}",
-                "head": "${{ github.event.pull_request.head.ref }}",
-                "files_changed": ${{ toJson(github.event.pull_request.changed_files) }},
-                "author": "${{ github.event.pull_request.user.login }}"
-              }
-            }'
-        env:
-          APORT_AGENT_ID: ${{ secrets.APORT_AGENT_ID }}
+      - uses: aporthq/policy-verify-action@v1
+        with:
+          mode: auto
 ```
+
+The maintained Action uses GitHub OIDC to issue/reuse a hosted OAP passport
+and sends Action-collected evidence to `code.repository.merge.v1`. Do not use
+older raw `curl` examples with broad workflow secrets for the default setup.
 
 ## 🔧 Creating Custom Policy Packs
 
