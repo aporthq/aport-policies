@@ -1,7 +1,7 @@
 {
   "id": "code.repository.merge.v1",
   "name": "Repository Safety Policy",
-  "description": "Pre-action governance for repository operations. Enforces PR limits, merge controls, path restrictions, and review requirements for dev-first safety.",
+  "description": "Pre-action governance for repository operations. Enforces repository allowlists, branch controls, path restrictions, and PR size limits for dev-first safety.",
   "version": "1.0.0",
   "status": "active",
   "requires_capabilities": ["repo.pr.create", "repo.merge"],
@@ -26,7 +26,7 @@
     "allowed_base_branches_enforced": true,
     "path_allowlist_enforced": true,
     "size_limits_enforced": true,
-    "review_requirements_enforced": true
+    "review_requirements_enforced": false
   },
   "mcp": {
     "require_allowlisted_if_present": true
@@ -35,7 +35,7 @@
     "Implement repository allowlists to prevent unauthorized access",
     "Use branch protection rules for critical branches",
     "Monitor PR size and complexity to prevent oversized changes",
-    "Require code reviews for production merges",
+    "Use GitHub branch protection for production review requirements",
     "Log all repository operations for Verifiable Attestation",
     "Use path allowlists to restrict file access patterns",
     "Subscribe to status webhooks for instant suspend",
@@ -141,7 +141,7 @@
     },
     {
       "name": "pr_size_limit",
-      "condition": "lines_added + lines_removed <= limits.max_pr_size_kb * 1000",
+      "condition": "ceil((lines_added + lines_removed) / 10) <= limits.max_pr_size_kb",
       "deny_code": "oap.limit_exceeded",
       "description": "PR size must not exceed limit"
     },
