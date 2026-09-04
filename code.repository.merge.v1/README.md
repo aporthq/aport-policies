@@ -8,7 +8,7 @@ The `code.repository.merge.v1` policy pack protects repository operations with P
 
 | **Requirement** | **Value** | **Description** |
 |-----------------|-----------|-----------------|
-| **Capability** | Action-dependent | `pr.merge` requires `repo.merge`; `pr.create`, `pr.update`, and `repo.push` currently require `repo.pr.create` until narrower repository capabilities are introduced |
+| **Capability** | Action-dependent | `pr.create` and `pr.update` require `repo.pr.create`; `pr.merge` requires `repo.merge`; `repo.push` requires explicit `repo.push` |
 | **Assurance** | L2+ (GitHub Verified) | Minimum assurance level required |
 | **Limits** | PR/merge daily caps, size limits | Required operational limits |
 
@@ -17,7 +17,7 @@ The `code.repository.merge.v1` policy pack protects repository operations with P
 - **`pr.create`**: creates a pull request and consumes the daily PR-create counter.
 - **`pr.update`**: updates or reconciles an existing pull request without consuming the daily PR-create counter.
 - **`pr.merge`**: merges a pull request and consumes the daily merge counter.
-- **`repo.push`**: records a repository push or branch update without consuming PR-create or merge counters.
+- **`repo.push`**: records a repository push or branch update. Hosted GitHub repository guard passports do not receive this capability by default; teams must opt in explicitly before direct pushes can receive signed allow decisions.
 - Legacy aliases such as `push`, `pull_request.create`, `pull_request.update`, `repo.merge`, `branch.create`, and `branch.delete` are accepted for backward compatibility.
 
 ## Limits Configuration
