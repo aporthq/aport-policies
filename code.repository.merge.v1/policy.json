@@ -6,6 +6,12 @@
   "status": "active",
   "requires_capabilities": ["repo.pr.create", "repo.merge"],
   "capability_mode": "action_dependent",
+  "action_capabilities": {
+    "pr.create": ["repo.pr.create"],
+    "pr.update": ["repo.pr.create"],
+    "pr.merge": ["repo.merge"],
+    "repo.push": ["repo.push"]
+  },
   "min_assurance": "L2",
   "limits_required": [
     "max_prs_per_day",
@@ -137,7 +143,7 @@
       "name": "repo_capability",
       "condition": "action in passport.capabilities",
       "deny_code": "oap.unknown_capability",
-      "description": "Agent must have required repository capability"
+      "description": "Agent must have the action-specific repository capability: repo.pr.create for PR create/update, repo.merge for PR merge, or repo.push for direct push"
     },
     {
       "name": "pr_size_limit",
