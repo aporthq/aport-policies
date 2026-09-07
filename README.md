@@ -212,6 +212,9 @@ jobs:
 The maintained Action uses GitHub OIDC to issue/reuse a hosted OAP passport
 and sends Action-collected evidence to `code.repository.merge.v1`. Do not use
 older raw `curl` examples with broad workflow secrets for the default setup.
+For customer-owned audit trails, configure a repository variable
+`APORT_GITHUB_AGENT_ID` and a GitHub Secret `APORT_API_KEY`, then pass them as
+`agent-id` and `api-key` in hosted mode.
 
 ## 🔧 Creating Custom Policy Packs
 
