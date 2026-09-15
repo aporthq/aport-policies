@@ -92,8 +92,8 @@
   "evaluation_rules": [
     {
       "name": "domain_allowlist",
-      "type": "expression",
-      "condition": "limits.allowed_domains.includes('*') || limits.allowed_domains.some(d => context.url.includes(d))",
+      "type": "custom_validator",
+      "validator": "validateWebFetchAllowedDomains",
       "deny_code": "oap.domain_not_allowed",
       "description": "URL domain must be in allowed list",
       "message": "Domain not in allowed list. Configure passport limits.allowed_domains to grant access."

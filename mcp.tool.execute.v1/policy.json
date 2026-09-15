@@ -90,8 +90,8 @@
   "evaluation_rules": [
     {
       "name": "server_allowlist",
-      "type": "expression",
-      "condition": "limits.allowed_servers.includes(context.server) || limits.allowed_servers.includes('*')",
+      "type": "custom_validator",
+      "validator": "validateMCPServerAllowlist",
       "deny_code": "oap.server_not_allowed",
       "description": "MCP server must be in allowed list"
     },
@@ -104,8 +104,8 @@
     },
     {
       "name": "tool_allowlist",
-      "type": "expression",
-      "condition": "(limits.allowed_tools && (limits.allowed_tools.includes(context.tool) || limits.allowed_tools.includes('*'))) || (limits.allowed_tool_prefixes && limits.allowed_tool_prefixes.some(prefix => context.tool.startsWith(prefix)))",
+      "type": "custom_validator",
+      "validator": "validateMCPToolAllowlist",
       "deny_code": "oap.tool_not_allowed",
       "description": "MCP tool must be in allowed list or match allowed prefix"
     },
