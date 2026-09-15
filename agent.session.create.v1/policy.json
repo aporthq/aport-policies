@@ -126,7 +126,7 @@
     {
       "name": "session_duration_limit",
       "type": "expression",
-      "condition": "!context.requested_duration || context.requested_duration <= limits.max_session_duration",
+      "condition": "!limits.max_session_duration || (context.requested_duration && context.requested_duration <= limits.max_session_duration)",
       "deny_code": "oap.duration_limit_exceeded",
       "description": "Session duration must not exceed limit"
     },

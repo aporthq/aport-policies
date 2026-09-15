@@ -101,8 +101,8 @@
   "evaluation_rules": [
     {
       "name": "path_allowlist",
-      "type": "expression",
-      "condition": "limits.allowed_paths.includes('*') || limits.allowed_paths.some(p => context.file_path.startsWith(p) || context.file_path.includes(p.replace('*', '')))",
+      "type": "custom_validator",
+      "validator": "validateFileWritePath",
       "deny_code": "oap.path_not_allowed",
       "description": "File path must be in allowed list or match allowed pattern",
       "message": "File path not in allowed list. Configure passport limits.data.file.write.allowed_paths to grant access."

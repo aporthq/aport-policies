@@ -102,8 +102,8 @@
   "evaluation_rules": [
     {
       "name": "command_allowlist",
-      "type": "expression",
-      "condition": "limits.allowed_commands.includes('*') || limits.allowed_commands.includes(context.command) || limits.allowed_commands.some(c => context.command.startsWith(c))",
+      "type": "custom_validator",
+      "validator": "validateCommandAllowlist",
       "deny_code": "oap.command_not_allowed",
       "description": "Command must be in allowed list"
     },
@@ -117,7 +117,7 @@
     {
       "name": "execution_time_limit",
       "type": "expression",
-      "condition": "!context.timeout || context.timeout <= limits.max_execution_time",
+      "condition": "!limits.max_execution_time || (context.timeout && context.timeout <= limits.max_execution_time)",
       "deny_code": "oap.limit_exceeded",
       "description": "Execution time must not exceed limit"
     },
