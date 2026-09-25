@@ -41,7 +41,7 @@ The System Command Execution Policy provides pre-action governance for shell com
 - `args` (array): Command arguments
 - `cwd` (string): Working directory
 - `env` (object): Environment variables
-- `timeout` (integer): Command timeout in seconds
+- `timeout` (integer): Command timeout in seconds. Optional in the schema, but when the passport sets `max_execution_time` the `execution_time_limit` rule requires it: a request without `timeout` is denied with `oap.limit_exceeded`. A host that runs commands under its own default timeout must send that default (for example Claude Code runs Bash under 120000 ms when the call carries no timeout, so its hook sends `timeout: 120`).
 - `shell` (string): Shell to use (bash, sh, zsh, etc.)
 - `user` (string): User to run command as
 - `mcp_servers`, `mcp_tools`, `mcp_session`: MCP integration fields

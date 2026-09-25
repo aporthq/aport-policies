@@ -68,6 +68,12 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 | **`web.fetch.v1`** | `web.fetch` | L0 | URL allowlists, blocked domains, method/header restrictions, rate limiting |
 | **`web.browser.v1`** | `web.browser` | L0 | URL allowlists, action restrictions (navigate/click/type), screenshot/navigation rate limits |
 
+### 🎨 **Media**
+
+| Policy Pack | Capability | Min Assurance | Key Features |
+|-------------|------------|---------------|--------------|
+| **`media.image.generate.v1`** | `media.image.generate` | L0 | Provider allowlists, prompt-length limits, referenced-image limits, output count and format controls |
+
 
 ### 💬 **Communication**
 
@@ -318,6 +324,8 @@ Always use OAP standard error codes:
 - `oap.idempotency_conflict` - Duplicate idempotency key
 
 ### Limits Structure
+Limits belong to the passport. Every policy pack reads its limits from `passport.limits["<capability>"]` for the capability it requires, and nothing in the verification request `context` can add to or override them. To give two tasks different limits, use two passports (or send a caller-built `passport` in the request body, which is evaluated as-is and not recorded).
+
 Use nested limits under capability names:
 ```json
 {
@@ -334,6 +342,8 @@ Use nested limits under capability names:
   }
 }
 ```
+
+Limit values are usually scalars or string arrays, and some are nested objects, such as the `currency_limits` block above. `deliverable.task.complete` is the one registered capability whose limits include an array of objects: `acceptance_criteria`, an array of `{ "id", "description" }`. The policy requires one attestation per `id` in the request. See [deliverable.task.complete.v1](./deliverable.task.complete.v1/README.md).
 
 ### Assurance Levels
 - **L1** - Basic verification (email, domain)
