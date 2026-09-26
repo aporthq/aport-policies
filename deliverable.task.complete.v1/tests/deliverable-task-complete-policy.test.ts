@@ -407,6 +407,65 @@ describe("deliverable.task.complete.v1", () => {
     expect(decision.reasons[0]?.code).toBe("oap.tests_not_passing");
   });
 
+  // Test 2b: met as the string "true" → DENY (strict !== true).
+  //
+  // The counterpart of 9b for the other strict check. validateDeliverableCriteriaMet
+  // uses `a.met !== true` rather than `!a.met`, so a truthy non-boolean must not
+  // pass. Until this case existed, 9b covered only tests_passing and nothing held
+  // the met comparison: loosening it to `a.met != true` left the suite green.
+  it("2b. DENY oap.criteria_not_met: met string 'true' (strict check)", async () => {
+    const passport = basePassport({
+      limits: {
+        "deliverable.task.complete": deliverableLimits({
+          acceptance_criteria: [{ id: "c1", description: "C1" }],
+        }),
+      },
+    });
+    const context = baseContext({
+      criteria_attestations: [
+        { criterion_id: "c1", met: "true" as any, evidence: "CI run 918" },
+      ],
+    });
+    const decision = await evaluateGenericPolicy(
+      mockEnv,
+      PACK_ID,
+      passport,
+      context,
+      undefined,
+      { skipSigning: true }
+    );
+    expect(decision.allow).toBe(false);
+    expect(decision.reasons[0]?.code).toBe("oap.criteria_not_met");
+  });
+
+  // Test 2c: met as 1 → DENY. Numeric truthiness is the other coercion the hosted
+  // route rejects outright; the evaluator has to reject it on its own too, because
+  // the in-repo path never runs Joi.
+  it("2c. DENY oap.criteria_not_met: met numeric 1 (strict check)", async () => {
+    const passport = basePassport({
+      limits: {
+        "deliverable.task.complete": deliverableLimits({
+          acceptance_criteria: [{ id: "c1", description: "C1" }],
+        }),
+      },
+    });
+    const context = baseContext({
+      criteria_attestations: [
+        { criterion_id: "c1", met: 1 as any, evidence: "CI run 919" },
+      ],
+    });
+    const decision = await evaluateGenericPolicy(
+      mockEnv,
+      PACK_ID,
+      passport,
+      context,
+      undefined,
+      { skipSigning: true }
+    );
+    expect(decision.allow).toBe(false);
+    expect(decision.reasons[0]?.code).toBe("oap.criteria_not_met");
+  });
+
   // Test 12: require_different_reviewer: true, different agent_ids → ALLOW
   it("12. ALLOW: different reviewer and author", async () => {
     const passport = basePassport({
