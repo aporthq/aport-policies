@@ -50,6 +50,23 @@ describe("media.image.generate.v1", () => {
     expect(decision.allow).toBe(true);
   });
 
+  it("rejects reserved hosted verifier routing fields in direct policy context", async () => {
+    const decision = await evaluateGenericPolicy(
+      {} as any,
+      PACK_ID,
+      passport(),
+      context({
+        agent_id: "ap_media_agent",
+        idempotency_key: "img_20260926_001",
+      }),
+      undefined,
+      { skipSigning: true },
+    );
+
+    expect(decision.allow).toBe(false);
+    expect(decision.reasons[0]?.code).toBe("oap.invalid_context");
+  });
+
   it("denies provider, prompt, reference, output count, and format violations", async () => {
     const cases = [
       [{ provider: "blocked" }, "oap.provider_not_allowed"],
