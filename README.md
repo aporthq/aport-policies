@@ -65,7 +65,7 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 
 | Policy Pack | Capability | Min Assurance | Key Features |
 |-------------|------------|---------------|--------------|
-| **`web.fetch.v1`** | `web.fetch` | L0 | URL allowlists, blocked domains, method/header restrictions, rate limiting |
+| **`web.fetch.v1`** | `web.fetch` | L0 | URL allowlists, blocked domains, method/header restrictions, rate limiting; see [web fetch DNS and SSRF model](../docs/WEB-FETCH-DNS-SSRF.md) for hostname-resolution limits |
 | **`web.browser.v1`** | `web.browser` | L0 | URL allowlists, action restrictions (navigate/click/type), screenshot/navigation rate limits |
 
 ### 🎨 **Media**

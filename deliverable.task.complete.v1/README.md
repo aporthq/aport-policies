@@ -27,7 +27,9 @@ Enforces that the agent has provided required deliverable evidence before "done"
 
 Each attestation: `criterion_id` (string), `met` (JSON boolean), `evidence` (string, 1 to 2000 chars). `met` must be the boolean `true`, not the string `"true"`. See "Type coercion on the hosted route" below for how the two layers treat a string.
 
-Hosted route request-size note: `POST /api/verify/policy/deliverable.task.complete.v1` calls the shared request-size preflight before parsing JSON. For SDKs and curl-style clients that send `Content-Length`, the current effective limit is the default 10 KB whole request, so the 10 MB `output_content` schema bound is not reachable on that hosted path unless the route-level limit is raised. Treat hosted `output_content` as a small excerpt or omit it and rely on other evidence; the 10 MB field bound remains a schema declaration, not the practical hosted upload size today.
+Hosted route request-size note: `POST /api/verify/policy/deliverable.task.complete.v1` calls the shared request-size preflight before parsing JSON. For SDKs and curl-style clients that send `Content-Length`, the effective limit is 256 KB for the whole request, raised from 10 KB in `functions/utils/validation/input-sanitizer.ts`. The passport, the attestations and the envelope take roughly 3 KB before any document is added, so a document of about 250 KB fits, which is a few tens of thousands of words. The 10 MB `output_content` schema bound is still not reachable on the hosted path and remains a schema declaration.
+
+Send the real `output_content` when `scan_output` is on. It is the only thing the blocked-pattern scan reads, so omitting it does not produce a lighter request that still gets scanned; it produces a pass with nothing scanned. An earlier version of this note advised treating hosted `output_content` as a small excerpt because 10 KB rejected ordinary documents, and following that advice silently disabled the scan. At 256 KB there is no longer a reason to truncate. If a document genuinely exceeds the limit, scan it before submission and say so in `criteria_attestations` evidence rather than sending an excerpt the scanner will clear.
 
 The sizes and ranges in that table are the declared context schema. On the hosted route,
 the request-size preflight may reject the whole request before these context-schema bounds are
@@ -291,7 +293,7 @@ The deny code is meant to tell the agent what is missing so it can correct the r
 | `oap.summary_insufficient` | `require_summary` is on and `summary` is absent, not a string, or below `min_summary_words` | Write a summary of at least `min_summary_words` words (default 10) describing what was done. |
 | `oap.tests_not_passing` | `require_tests_passing` is on and `tests_passing` is not boolean `true` (false, missing, or a string) | Fix the failing tests, run them, then resubmit with `tests_passing: true`. |
 | `oap.self_review_not_allowed` | `require_different_reviewer` is on and either id is missing or the two ids are equal | Get a review from a different agent and submit both `reviewer_agent_id` and `author_agent_id`. |
-| `oap.blocked_pattern_detected` | `scan_output` is on and `output_content` contains a blocked pattern (case-insensitive) | Remove the pattern named in the message from the output, then resubmit. Or omit `output_content` if the passport owner accepts an unscanned completion; the scan is skipped when it is absent. |
+| `oap.blocked_pattern_detected` | `scan_output` is on and `output_content` contains a blocked pattern (case-insensitive) | Remove the pattern named in the message from the output, then resubmit. Omitting `output_content` also clears this code, because `validateDeliverableBlockedPatterns` skips when the field is absent, but that is a gap in the check rather than a way to pass it: the owner set `scan_output` to have the content read. Only omit with the owner's agreement. |
 
 ## Worked Example
 
