@@ -21,6 +21,7 @@
     "resource_id"
   ],
   "optional_fields": [
+    "data_timestamp",
     "action_type",
     "jurisdiction",
     "row_count",
@@ -65,6 +66,11 @@
       "resource_id"
     ],
     "properties": {
+      "data_timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Data creation timestamp, required when max_data_age_seconds is configured."
+      },
       "data_classification": {
         "type": "string",
         "description": "The classification of the data being accessed (e.g., 'PII', 'Financial', 'HR', 'ClientTier1')."
