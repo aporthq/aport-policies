@@ -47,6 +47,36 @@ Policy packs are **pre-built, OAP-compliant policy definitions** that provide in
 | **`data.report.ingest.v1`** | `data.report.ingest` | L2 | Data quality checks, schema validation, rate limiting |
 | **`governance.data.access.v1`** | `data.access` | L3 | Access controls, data classification, audit logging |
 
+#### Export row allowances
+
+`max_export_rows` limits each `data.export.create.v1` request. It does not create
+a daily allowance. To also bound cumulative rows, configure `daily_export_rows`
+as a non-negative safe integer and supply an idempotency key on each verification
+request. Zero denies positive-row exports; omission adds no cumulative cap.
+Invalid explicit values and missing accounting keys deny rather than skip the cap.
+
+The export evaluator resolves each limit from `limits["data.export"]`,
+then `limits.data.export`, then the legacy `limits` root. An unrelated field in
+one layout does not hide restrictions in another. Existing per-request row,
+PII, collection and format checks still apply. Cumulative usage uses the existing
+24-hour counter window; it is not a promise of an atomic export transaction.
+
+#### Stateful verification boundaries
+
+Hosted daily accounting requires successful counter reads and a confirmed write.
+Read errors, malformed usage records and write failures return DENY. This also
+applies to the payment, refund, spending and custom daily counters used by other
+policies. KV per-key write throttling can therefore deny otherwise valid requests.
+The existing read/modify/write counters are not atomic: concurrent requests or
+stale reads can still lose updates, and separate counters do not share a transaction.
+
+Passport-in-body evaluation is an unsigned, request-scoped simulation. Its policy
+counters start empty and cannot read or write a registered agent's hosted quota.
+The response includes `simulation.state_scope: "request"`,
+`hosted_usage_checked: false` and `capacity_reserved: false`. Per-request policy
+checks still apply; this mode does not establish available hosted capacity or
+reserve it. Endpoint authentication and admission throttling remain separate.
+
 ### 🔀 **Code & Infrastructure**
 
 | Policy Pack | Capability | Min Assurance | Key Features |
@@ -324,6 +354,11 @@ Always use OAP standard error codes:
 - `oap.idempotency_conflict` - Duplicate idempotency key
 
 ### Limits Structure
+
+For customer or tenant ownership checks across policy packs, see
+[Authorization scope](./AUTHORIZATION_SCOPE.md). This optional root-level limit
+compares backend-attested requester and resource scope before policy evaluation;
+it does not replace the agent's capabilities or application authentication.
 Limits belong to the passport. Every policy pack reads its limits from `passport.limits["<capability>"]` for the capability it requires, and nothing in the verification request `context` can add to or override them. To give two tasks different limits, use two passports (or send a caller-built `passport` in the request body, which is evaluated as-is and not recorded).
 
 Use nested limits under capability names:

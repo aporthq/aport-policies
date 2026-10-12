@@ -8,7 +8,7 @@
   "min_assurance": "L1",
   "limits_required": ["max_export_rows", "allow_pii"],
   "required_fields": ["export_type", "format", "filters"],
-  "optional_fields": ["include_pii", "date_range", "columns"],
+  "optional_fields": ["include_pii", "date_range", "columns", "estimated_rows", "rows_to_export"],
   "enforcement": {
     "rows_lte": "limits.data.export.max_export_rows",
     "pii_allowed": "limits.data.export.allow_pii"
@@ -30,6 +30,18 @@
     "type": "object",
     "required": ["export_type", "format", "filters"],
     "properties": {
+      "estimated_rows": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000000,
+        "description": "Estimated row count. If both count fields are supplied, the larger is checked and counted. If neither is supplied, the compatibility estimate is 1000 rows."
+      },
+      "rows_to_export": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000000,
+        "description": "Requested row count, checked against the same per-export and daily limits as estimated_rows."
+      },
       "export_type": {
         "type": "string",
         "enum": ["users", "orders", "transactions", "analytics"],
